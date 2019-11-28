@@ -40,7 +40,7 @@ matplotlib==3.0.3
 
 ### From commandline
 
-```bash
+```sh
 fw=tbss_FW_tfce_corrp_tstat2_filled.nii.gz
 
 ./nifti_snapshot \
