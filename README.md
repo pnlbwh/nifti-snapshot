@@ -39,6 +39,32 @@ matplotlib==3.0.3
 
 ## TBSS figures
 
+### From commandline
+
+```sh
+fa=tbss_FA_tfce_corrp_tstat1_filled.nii.gz
+fat=tbss_FAt_tfce_corrp_tstat1_filled.nii.gz
+
+./nifti_snapshot \
+    --input ${fa} ${fat} \
+    --tbss \
+    --output_file cli_test.png \
+    --cmap "Blues_r" "autumn" \
+    --alpha 1 1 \
+    --title "Significant changes in FA and FAt in HC vs SLE" \
+    --cbar_title 'Reduced FA' 'Reduced FAt' 'Overlap' \
+    --overlap \
+    --overlap_cmap "summer" \
+    --overlap_alpha 0.8
+```
+
+![output](docs/fa_fat_example.png)
+
+
+---
+
+
+### From python
 ```py
 from nifti_snapshot import nifti_snapshot
 ```
