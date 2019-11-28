@@ -72,7 +72,7 @@ fat=tbss_FAt_tfce_corrp_tstat1_filled.nii.gz
     --cmap "Blues_r" "autumn" \
     --alpha 1 1 \
     --title "Significant changes in FA and FAt in group A" \
-    --cbar_title 'Reduced FA (34.5%)' 'Reduced FAt (26.5%)' 'Overlap' \
+    --cbar_title 'Reduced' 'Reduced FAt' 'Overlap' \
     --overlap \
     --overlap_cmap "summer" \
     --overlap_alpha 0.8
