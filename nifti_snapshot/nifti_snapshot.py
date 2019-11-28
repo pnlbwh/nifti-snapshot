@@ -4,12 +4,13 @@ import numpy as np
 from pathlib import Path
 import nibabel as nb
 from scipy import ndimage
+import os
 import functools
 
 class Enigma:
     # @functools.cached_property
     def __init__(self):
-        self.enigma_dir = Path('/data/pnl/soft/pnlpipe3/tbss/data/enigmaDTI')
+        self.enigma_dir = Path(os.environ['ENIGMA_dir'])
         self.enigma_fa_loc = self.enigma_dir / 'ENIGMA_DTI_FA.nii.gz'
         self.enigma_fa_data = nb.load(str(self.enigma_fa_loc)).get_data()
         self.enigma_skeleton_mask_loc = self.enigma_dir / \
@@ -17,6 +18,17 @@ class Enigma:
         self.enigma_skeleton_data = nb.load(
             str(self.enigma_skeleton_mask_loc)).get_data()
 
+class Fsl:
+    def __init__(self):
+        self.fsldir = os.environ['FSLDIR']
+        self.fmrib_fa_loc = Path(self.fsldir) / \
+            'data/standard/FMRIB58_FA_1mm.nii.gz'
+        self.fmrib_fa_data = nb.load(str(self.fmrib_fa_loc)).get_data()
+
+        self.fmrib_skeleton_loc = Path(self.fsldir) / \
+            'data/standard/FMRIB58_FA-skeleton_1mm.nii.gz'
+        self.fmrib_skeleton_data = nb.load(
+            str(self.fmrib_skeleton_loc)).get_data()
 
 class FigureSettings:
     def __init__(self):
@@ -126,10 +138,10 @@ class FigureNifti:
         self.image_data_list.append(self.overlap_map)
 
 
-
-class TbssFigure(Enigma, FigureSettings, FigureNifti):
+class TbssFigure(Enigma, Fsl, FigureSettings, FigureNifti):
     def __init__(self, **kwargs):
         Enigma.__init__(self)
+        # Fsl.__init__(self)
         FigureSettings.__init__(self)
 
         self.get_cbar_horizontal_info()

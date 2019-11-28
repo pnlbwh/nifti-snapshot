@@ -27,6 +27,8 @@ git clone https://github.com/pnlbwh/nifti-snapshot
 ## Dependencies
 
 ```py
+FSLDIR in PATH
+ENIGMADIR in PATH
 python 3.7
 scipy==1.3.3
 nibabel==2.4.0
