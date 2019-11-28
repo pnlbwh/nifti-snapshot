@@ -1,6 +1,13 @@
 # nifti-snapshot
 Tools used to summarize Nifti files into figures
 
+And the code looks like this:
+```
+---
+[![nifti_snapshot](docs/icon.png)]
+---
+```
+
 ```py
 git clone https://github.com/pnlbwh/nifti-snapshot
 ```
