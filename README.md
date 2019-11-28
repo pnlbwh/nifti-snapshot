@@ -18,6 +18,7 @@ git clone https://github.com/pnlbwh/nifti-snapshot
 
 ## TODO
 
+- test script
 - add different background image options
 - 4d map summary (diffusion)
 - ROI & multi ROI visualization

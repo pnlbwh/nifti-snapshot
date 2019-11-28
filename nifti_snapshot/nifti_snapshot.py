@@ -138,7 +138,7 @@ class FigureNifti:
         self.image_data_list.append(self.overlap_map)
 
 
-class TbssFigure(Enigma, Fsl, FigureSettings, FigureNifti):
+class Figure(FigureSettings, FigureNifti):
     def __init__(self, **kwargs):
         Enigma.__init__(self)
         # Fsl.__init__(self)
@@ -150,10 +150,7 @@ class TbssFigure(Enigma, Fsl, FigureSettings, FigureNifti):
             print(f"\t{key} : {value}")
             setattr(self, key, value)
 
-        self.get_center(self.enigma_fa_data)
-        self.enigma_skeleton_data = self.transparent_mask(
-            self.enigma_skeleton_data)
-
+        # create fig and axes
         self.fig, self.axes = plt.subplots(
             ncols=self.ncols,
             nrows=self.nrows,
@@ -161,40 +158,17 @@ class TbssFigure(Enigma, Fsl, FigureSettings, FigureNifti):
                      self.size_h * self.nrows),
             dpi=self.dpi)
 
+        # figure settings
         self.fig.subplots_adjust(hspace=0, wspace=0)
-
-        # self.image_files = image_files
-        self.image_data_list = [nb.load(x).get_data() for x
-                                in self.image_files]
         plt.style.use('dark_background')
 
+        # load background data
+        self.background_data_list = [nb.load(x).get_data() for x
+                                     in self.background_files]
 
-    def create_figure_one_map(self):
-        self.images_mask_out_the_zero()
-        self.loop_through_axes_draw_bg()
-        self.annotate_with_z()
-
-        self.loop_through_axes_draw_images()
-        self.add_cbars_horizontal()
-
-        self.fig.suptitle(self.title, y=0.9, fontsize=25)
-        self.fig.savefig(self.output_file, dpi=200)#, bbox_inches='tight')
-
-    def create_figure_two_maps_and_overlap(self):
-        self.images_mask_out_the_zero()
-        self.loop_through_axes_draw_bg()
-        self.annotate_with_z()
-
-        self.loop_through_axes_draw_images()
-        # estimate overlap
-        self.get_overlap_between_maps()
-        self.loop_through_axes_draw_overlap()
-
-        self.get_cbar_horizontal_info()
-        self.add_cbars_horizontal()
-
-        self.fig.suptitle(self.title, y=0.9, fontsize=25)
-        self.fig.savefig(self.output_file, dpi=200)#, bbox_inches='tight')
+        # load foreground ata
+        self.image_data_list = [nb.load(x).get_data() for x
+                                in self.image_files]
 
     def images_mask_out_the_skeleton(self):
         new_images = []
@@ -262,3 +236,41 @@ class TbssFigure(Enigma, Fsl, FigureSettings, FigureNifti):
                     vmin=0,
                     vmax=1, alpha=alpha)
             self.imshow_list.append(img)
+    # def create_figure_
+
+class TbssFigure(Figure, FigureNifti):
+    def __init__(self, **kwargs):
+        self.get_center(self.enigma_fa_data)
+        self.enigma_skeleton_data = self.transparent_mask(
+            self.enigma_skeleton_data)
+
+        Figure.__init__(self)
+
+    def create_figure_one_map(self):
+        self.images_mask_out_the_zero()
+        self.loop_through_axes_draw_bg()
+        self.annotate_with_z()
+
+        self.loop_through_axes_draw_images()
+        self.add_cbars_horizontal()
+
+        self.fig.suptitle(self.title, y=0.9, fontsize=25)
+        self.fig.savefig(self.output_file, dpi=200)#, bbox_inches='tight')
+
+    def create_figure_two_maps_and_overlap(self):
+        self.images_mask_out_the_zero()
+        self.loop_through_axes_draw_bg()
+        self.annotate_with_z()
+
+        self.loop_through_axes_draw_images()
+        # estimate overlap
+        self.get_overlap_between_maps()
+        self.loop_through_axes_draw_overlap()
+
+        self.get_cbar_horizontal_info()
+        self.add_cbars_horizontal()
+
+        self.fig.suptitle(self.title, y=0.9, fontsize=25)
+        self.fig.savefig(self.output_file, dpi=200)#, bbox_inches='tight')
+
+
