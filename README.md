@@ -1,6 +1,8 @@
-![icon](docs/icon_resize.png) # nifti-snapshot
+![icon](docs/icon_resize.png) 
 
-Tools used to summarize Nifti files into figures
+# nifti-snapshot
+
+Tools used to summarize nifti files into figures.
 
 ```py
 git clone https://github.com/pnlbwh/nifti-snapshot
