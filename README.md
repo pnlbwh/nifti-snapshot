@@ -28,7 +28,9 @@ git clone https://github.com/pnlbwh/nifti-snapshot
 
 ```py
 FSLDIR in PATH
-ENIGMADIR in PATH
+ENIGMA_dir in PATH 
+# download from http://enigma.ini.usc.edu/wp-content/uploads/2013/02/enigmaDTI.zip
+
 python 3.7
 scipy==1.3.3
 nibabel==2.4.0
