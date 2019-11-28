@@ -18,7 +18,6 @@ git clone https://github.com/pnlbwh/nifti-snapshot
 
 ## TODO
 
-- commandline argparse module
 - add different background image options
 - 4d map summary (diffusion)
 - ROI & multi ROI visualization
@@ -42,6 +41,22 @@ matplotlib==3.0.3
 ### From commandline
 
 ```bash
+fw=tbss_FW_tfce_corrp_tstat2_filled.nii.gz
+
+./nifti_snapshot \
+    --input ${fw} \
+    --tbss \
+    --output_file cli_test_fw.png \
+    --cmap "Blues_r" \
+    --alpha 0.8 \
+    --title "Significant changes in FW in group A" \
+    --cbar_title 'Increased FW' 
+```
+
+![output](docs/fw_example.png)
+
+
+```bash
 fa=tbss_FA_tfce_corrp_tstat1_filled.nii.gz
 fat=tbss_FAt_tfce_corrp_tstat1_filled.nii.gz
 
@@ -51,8 +66,8 @@ fat=tbss_FAt_tfce_corrp_tstat1_filled.nii.gz
     --output_file cli_test.png \
     --cmap "Blues_r" "autumn" \
     --alpha 1 1 \
-    --title "Significant changes in FA and FAt in HC vs SLE" \
-    --cbar_title 'Reduced FA' 'Reduced FAt' 'Overlap' \
+    --title "Significant changes in FA and FAt in group A" \
+    --cbar_title 'Reduced FA (34.5%)' 'Reduced FAt (26.5%)' 'Overlap' \
     --overlap \
     --overlap_cmap "summer" \
     --overlap_alpha 0.8
@@ -68,7 +83,6 @@ fat=tbss_FAt_tfce_corrp_tstat1_filled.nii.gz
 ```py
 from nifti_snapshot import nifti_snapshot
 ```
-
 
 ### Snapshot of an `tbss_fill`ed image
 
@@ -86,10 +100,6 @@ tbssFigure = nifti_snapshot.TbssFigure(
         cbar_x=0.35, cbar_width=0.3)
 tbssFigure.create_figure_one_map()
 ```
-
-
-![output](docs/fw_example.png)
-
 
 ### Snapshot of two `tbss_fill`ed images with overlap highlight
 
@@ -115,5 +125,3 @@ tbssFigure = nifti_snapshot.TbssFigure(
     title='Significant changes in FA and FAt in group A')
 tbssFigure.create_figure_two_maps_and_overlap()
 ```
-
-![output](docs/fa_fat_example.png)

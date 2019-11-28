@@ -86,3 +86,17 @@ if __name__ == '__main__':
 
             tbssFigure.create_figure_two_maps_and_overlap()
 
+        elif len(args.input) == 1:
+            print('here')
+            tbssFigure = nifti_snapshot.TbssFigure(
+                image_files=args.input,
+                output_file=args.output_file,
+                cmap_list=args.cmap,
+                cbar_titles=args.cbar_title,
+                alpha_list=args.alpha,
+                title=args.title,
+                cbar_x=0.35, cbar_width=0.3)
+
+            tbssFigure.create_figure_one_map()
+
+
