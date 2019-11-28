@@ -1,8 +1,7 @@
 # nifti-snapshot
 Tools used to summarize Nifti files into figures
 
-![output](docs/icon.png)
-<img src="https://github.com/pnlbwh/nifti-snapshot/icon.png" width="100">
+![icon](docs/icon_resize.png)
 
 
 ```py
