@@ -56,7 +56,7 @@ fw=tbss_FW_tfce_corrp_tstat2_filled.nii.gz
 ![output](docs/fw_example.png)
 
 
-```bash
+```shell
 fa=tbss_FA_tfce_corrp_tstat1_filled.nii.gz
 fat=tbss_FAt_tfce_corrp_tstat1_filled.nii.gz
 
