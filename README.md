@@ -1,12 +1,35 @@
 # nifti-snapshot
 Tools used to summarize Nifti files into figures
 
+```py
+git clone https://github.com/pnlbwh/nifti-snapshot
+```
+
+
 ## Contents
 
+- Dependencies
 - TBSS figures
 
 
+## Dependencies
+
+```
+python 3.7
+scipy
+nibabel
+numpy
+pathlib
+matplotlib
+```
+
+
 ## TBSS figures
+
+```
+from nifti_snapshot import nifti_snapshot
+```
+
 
 ### Snapshot of an `tbss_fill`ed image
 
