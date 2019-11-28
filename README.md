@@ -49,7 +49,6 @@ fw=tbss_FW_tfce_corrp_tstat2_filled.nii.gz
     --tbss \
     --output_file cli_test_fw.png \
     --cmap "Blues_r" \
-    --alpha 0.8 \
     --title "Significant changes in FW in group A" \
     --cbar_title 'Increased FW' 
 ```
@@ -70,7 +69,6 @@ fat=tbss_FAt_tfce_corrp_tstat1_filled.nii.gz
     --tbss \
     --output_file cli_test.png \
     --cmap "Blues_r" "autumn" \
-    --alpha 1 1 \
     --title "Significant changes in FA and FAt in group A" \
     --cbar_title 'Reduced' 'Reduced FAt' 'Overlap' \
     --overlap \

@@ -1,5 +1,6 @@
 #!/data/pnl/kcho/anaconda3/bin/python
 import nifti_snapshot
+from pathlib import Path
 import matplotlib.pyplot as plt
 import argparse
 
@@ -81,21 +82,21 @@ if __name__ == '__main__':
                 cmap_list=args.cmap,
                 overlap_cmap=args.overlap_cmap,
                 cbar_titles=args.cbar_title,
-                alpha_list=args.alpha+[args.overlap_alpha],
+                alpha_list=[1, 1]+[args.overlap_alpha],
                 title=args.title)
 
             tbssFigure.create_figure_two_maps_and_overlap()
 
         elif len(args.input) == 1:
-            print('here')
             tbssFigure = nifti_snapshot.TbssFigure(
                 image_files=args.input,
                 output_file=args.output_file,
                 cmap_list=args.cmap,
                 cbar_titles=args.cbar_title,
-                alpha_list=args.alpha,
+                alpha_list=[0.8],
                 title=args.title,
-                cbar_x=0.35, cbar_width=0.3)
+                cbar_x=0.35, 
+                cbar_width=0.3)
 
             tbssFigure.create_figure_one_map()
 
