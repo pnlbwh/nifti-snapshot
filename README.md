@@ -41,7 +41,7 @@ matplotlib==3.0.3
 
 ### From commandline
 
-```sh
+```bash
 fa=tbss_FA_tfce_corrp_tstat1_filled.nii.gz
 fat=tbss_FAt_tfce_corrp_tstat1_filled.nii.gz
 
