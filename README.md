@@ -1,4 +1,4 @@
-#![icon](docs/icon_resize.png)  nifti-snapshot
+![icon](docs/icon_resize.png) # nifti-snapshot
 
 Tools used to summarize Nifti files into figures
 
