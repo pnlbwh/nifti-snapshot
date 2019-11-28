@@ -40,6 +40,7 @@ matplotlib==3.0.3
 
 ### From commandline
 
+#### Snapshot of an `tbss_fill` image
 ```sh
 fw=tbss_FW_tfce_corrp_tstat2_filled.nii.gz
 
@@ -55,6 +56,10 @@ fw=tbss_FW_tfce_corrp_tstat2_filled.nii.gz
 
 ![output](docs/fw_example.png)
 
+
+<br>
+
+#### Snapshot of two `tbss_fill` images with overlap highlight
 
 ```shell
 fa=tbss_FA_tfce_corrp_tstat1_filled.nii.gz
@@ -76,17 +81,16 @@ fat=tbss_FAt_tfce_corrp_tstat1_filled.nii.gz
 ![output](docs/fa_fat_example.png)
 
 
+
 ---
 
 
 ### From python
+
+#### Snapshot of an `tbss_fill` image
+
 ```py
 from nifti_snapshot import nifti_snapshot
-```
-
-### Snapshot of an `tbss_fill`ed image
-
-```py
 fw = 'tbss_FA_tfce_corrp_tstat1_filled.nii.gz'
 fw_color = 'Blues_r'
 
@@ -101,10 +105,10 @@ tbssFigure = nifti_snapshot.TbssFigure(
 tbssFigure.create_figure_one_map()
 ```
 
-### Snapshot of two `tbss_fill`ed images with overlap highlight
-
+#### Snapshot of two `tbss_fill` images with overlap highlight
 
 ```py
+from nifti_snapshot import nifti_snapshot
 fa = 'tbss_FA_tfce_corrp_tstat1_filled.nii.gz'
 fat = 'tbss_FAt_tfce_corrp_tstat1_filled.nii.gz'
 
