@@ -14,19 +14,19 @@ git clone https://github.com/pnlbwh/nifti-snapshot
 
 ## Dependencies
 
-```
+```py
 python 3.7
-scipy
-nibabel
-numpy
-pathlib
-matplotlib
+scipy==1.3.3
+nibabel==2.4.0
+numpy==1.16.2
+pathlib2==2.3.3
+matplotlib==3.0.3
 ```
 
 
 ## TBSS figures
 
-```
+```py
 from nifti_snapshot import nifti_snapshot
 ```
 
