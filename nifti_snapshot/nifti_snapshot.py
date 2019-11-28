@@ -162,38 +162,27 @@ class TbssFigure(Enigma, FigureSettings, FigureNifti):
         self.loop_through_axes_draw_bg()
         self.annotate_with_z()
 
-        # self.cmap_list = ['Blues_r', 'autumn_r', 'Purples_r']
         self.loop_through_axes_draw_images()
-        # self.get_overlap_between_maps()
-        # self.loop_through_axes_draw_overlap()
-
         self.add_cbars_horizontal()
 
         self.fig.suptitle(self.title, y=0.9, fontsize=25)
-
-        # self.fig.subplots_adjust(top=1.2)
         self.fig.savefig(self.output_file, dpi=200)#, bbox_inches='tight')
-        # self.fig.savefig(self.output_file, dpi=200, bbox_inches='tight')
 
     def create_figure_two_maps_and_overlap(self):
         self.images_mask_out_the_zero()
         self.loop_through_axes_draw_bg()
         self.annotate_with_z()
 
-        # self.cmap_list = ['Blues_r', 'autumn_r', 'Purples_r']
         self.loop_through_axes_draw_images()
+        # estimate overlap
         self.get_overlap_between_maps()
         self.loop_through_axes_draw_overlap()
 
-        # self.cbar_titles = ['FA', 'FAt', 'overlap']
         self.get_cbar_horizontal_info()
         self.add_cbars_horizontal()
 
         self.fig.suptitle(self.title, y=0.9, fontsize=25)
-
-        # self.fig.subplots_adjust(top=1.2)
         self.fig.savefig(self.output_file, dpi=200)#, bbox_inches='tight')
-        # self.fig.savefig(self.output_file, dpi=200, bbox_inches='tight')
 
     def images_mask_out_the_skeleton(self):
         new_images = []

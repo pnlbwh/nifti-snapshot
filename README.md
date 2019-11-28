@@ -11,8 +11,18 @@ git clone https://github.com/pnlbwh/nifti-snapshot
 
 ## Contents
 
+- TODO
 - Dependencies
 - TBSS figures
+
+
+## TODO
+
+- commandline argparse module
+- add different background image options
+- 4d map summary (diffusion)
+- ROI & multi ROI visualization
+- project wise examples
 
 
 ## Dependencies
