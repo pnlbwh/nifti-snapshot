@@ -1,4 +1,5 @@
-#!/data/pnl/kcho/anaconda3/bin/python
+#!/usr/bin/env python
+
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
@@ -94,6 +95,11 @@ class FigureNifti:
         data = np.where(data == 0, np.nan, data)
         return data
 
+    def transparent_threshold(self, data, threshold):
+        with np.errstate(invalid='ignore'):
+            data = np.where(data < threshold, np.nan, data)
+        return data
+
     def transparent_out_the_skeleton(self, data):
         data = np.where(self.enigma_skeleton_data == 1, data, np.nan)
         return data
@@ -162,9 +168,11 @@ class Figure(FigureSettings, FigureNifti):
         self.fig.subplots_adjust(hspace=0, wspace=0)
         plt.style.use('dark_background')
 
+    def read_data(self):
         # load background data
-        self.background_data_list = [nb.load(x).get_data() for x
-                                     in self.background_files]
+        if hasattr(self, 'background_files'):
+            self.background_data_list = [nb.load(x).get_data() for x
+                                         in self.background_files]
 
         # load foreground ata
         self.image_data_list = [nb.load(x).get_data() for x
@@ -181,6 +189,13 @@ class Figure(FigureSettings, FigureNifti):
         new_images = []
         for image in self.image_data_list:
             new_image = self.transparent_zero(image)
+            new_images.append(new_image)
+        self.image_data_list = new_images
+
+    def images_mask_by_threshold(self, threshold):
+        new_images = []
+        for image in self.image_data_list:
+            new_image = self.transparent_threshold(image, threshold)
             new_images.append(new_image)
         self.image_data_list = new_images
 
@@ -205,6 +220,22 @@ class Figure(FigureSettings, FigureNifti):
                     enigma_skeleton_d,
                     interpolation=None, cmap='ocean')
             ax.axis('off')
+
+    def loop_through_axes_draw_images_corrp_map(self, threshold):
+        for num, ax in enumerate(np.ravel(self.axes)):
+            z_num = self.slice_nums[num]
+
+            # background FA map
+            self.imshow_list = []
+            for img_num, image in enumerate(self.image_data_list):
+                alpha = self.alpha_list[img_num]
+                image_d = self.get_slice(image, z_num)
+                img = ax.imshow(
+                        image_d,
+                        cmap=self.cmap_list[img_num],
+                        vmin=threshold,
+                        vmax=1, alpha=alpha)
+                self.imshow_list.append(img)
 
     def loop_through_axes_draw_images(self):
         for num, ax in enumerate(np.ravel(self.axes)):
@@ -238,13 +269,13 @@ class Figure(FigureSettings, FigureNifti):
             self.imshow_list.append(img)
     # def create_figure_
 
-class TbssFigure(Figure, FigureNifti):
+class TbssFigure(Enigma, Figure, FigureNifti):
     def __init__(self, **kwargs):
+        Figure.__init__(self, **kwargs)
         self.get_center(self.enigma_fa_data)
         self.enigma_skeleton_data = self.transparent_mask(
             self.enigma_skeleton_data)
-
-        Figure.__init__(self)
+        self.read_data()
 
     def create_figure_one_map(self):
         self.images_mask_out_the_zero()
