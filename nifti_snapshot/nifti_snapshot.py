@@ -9,7 +9,7 @@ import os
 import functools
 
 class Enigma:
-    # @functools.cached_property
+    @functools.cached_property
     def __init__(self):
         self.enigma_dir = Path(os.environ['ENIGMA_dir'])
         self.enigma_fa_loc = self.enigma_dir / 'ENIGMA_DTI_FA.nii.gz'
@@ -82,7 +82,6 @@ class FigureSettings:
             cb.ax.yaxis.set_label_position('left')
             self.cbar_x += self.cbar_x_steps
 
-
 class FigureNifti:
     def get_slice(self, data, z_num):
         return np.flipud(data[:, :, z_num].T)
@@ -146,12 +145,8 @@ class FigureNifti:
 
 class Figure(FigureSettings, FigureNifti):
     def __init__(self, **kwargs):
-        Enigma.__init__(self)
-        # Fsl.__init__(self)
         FigureSettings.__init__(self)
-
         self.get_cbar_horizontal_info()
-        print('Given parameters')
         for key, value in kwargs.items():
             print(f"\t{key} : {value}")
             setattr(self, key, value)
@@ -243,15 +238,50 @@ class Figure(FigureSettings, FigureNifti):
 
             # background FA map
             self.imshow_list = []
+
             for img_num, image in enumerate(self.image_data_list):
-                alpha = self.alpha_list[img_num]
                 image_d = self.get_slice(image, z_num)
-                img = ax.imshow(
+                alpha = self.alpha_list[img_num]
+
+                # vmin and vmax
+                if hasattr(self, 'vmin_list'):
+                    vmin = self.vmin_list[img_num]
+                    has_vmin = True
+                else:
+                    has_vmin = False
+
+                if hasattr(self, 'vmax_list'):
+                    vmax = self.vmin_list[img_num]
+                    has_vmax = True
+                else:
+                    has_vmax = False
+
+                if has_vmin and has_vmax:
+                    img = ax.imshow(
                         image_d,
                         cmap=self.cmap_list[img_num],
-                        vmin=0,
-                        vmax=1, alpha=alpha)
+                        vmin=vmin,
+                        vmax=vmax,
+                        alpha=alpha)
+                elif has_vmin and has_vmax == False:
+                    img = ax.imshow(
+                        image_d,
+                        cmap=self.cmap_list[img_num],
+                        vmin=vmin,
+                        alpha=alpha)
+                elif has_vmax and has_vmin == False:
+                    img = ax.imshow(
+                        image_d,
+                        cmap=self.cmap_list[img_num],
+                        vmax=vmax,
+                        alpha=alpha)
+                else:
+                    img = ax.imshow(
+                        image_d,
+                        cmap=self.cmap_list[img_num],
+                        alpha=alpha)
                 self.imshow_list.append(img)
+            ax.axis('off')
 
     def loop_through_axes_draw_overlap(self):
         image = self.image_data_list[-1]
@@ -271,6 +301,8 @@ class Figure(FigureSettings, FigureNifti):
 
 class TbssFigure(Enigma, Figure, FigureNifti):
     def __init__(self, **kwargs):
+        Enigma.__init__(self)
+        Fsl.__init__(self)
         Figure.__init__(self, **kwargs)
         self.get_center(self.enigma_fa_data)
         self.enigma_skeleton_data = self.transparent_mask(
