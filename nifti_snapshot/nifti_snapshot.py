@@ -337,3 +337,21 @@ class TbssFigure(Enigma, Figure, FigureNifti):
         self.fig.savefig(self.output_file, dpi=200)#, bbox_inches='tight')
 
 
+class SimpleFigure(Figure):
+    def __init__(self, **kwargs):
+        Figure.__init__(self, **kwargs)
+        self.read_data()
+        self.get_center(self.image_data_list[0])
+
+        # remove negative
+        self.alpha_list = [1]
+        self.cmap_list = ['coolwarm']
+
+        self.loop_through_axes_draw_images()
+        self.annotate_with_z()
+
+        self.cbar_titles = ['intensity']
+        self.add_cbars_horizontal()
+
+        self.fig.suptitle(self.title, y=0.9, fontsize=25)
+
