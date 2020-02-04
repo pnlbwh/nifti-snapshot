@@ -43,7 +43,8 @@ matplotlib==3.0.3
 ## Single image examples
 
 ### Link to a single image examples
-[Jupyter notebook link](docs/Single image example.ipynb)
+
+![Jupyter notebook link](docs/Single image example.ipynb)
 
 
 
