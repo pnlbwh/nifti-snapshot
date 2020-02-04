@@ -6,6 +6,7 @@ from pathlib import Path
 import nibabel as nb
 from scipy import ndimage
 import os
+import seaborn as sns
 
 class Enigma:
     def __init__(self):
@@ -38,12 +39,42 @@ class FigureSettings:
         self.size_h = 4
         self.slice_gap = 3
         self.dpi = 200
+        self.hspace = 0
+        self.top = 0.9
+        self.bottom = 0.1
+        self.wspace = 0
+        self.title_font_size = 25
 
     def get_cbar_horizontal_info(self):
         self.cbar_x = 0.25
         self.cbar_y = 0.03
         self.cbar_height = 0.03
         self.cbar_width = 0.15
+
+    def add_intensity_cbars_horizontal(self):
+        self.cbar_x_steps = 0.2
+
+        for num, image_data in enumerate(self.image_data_list):
+            # x, y, width, height
+            cbar_title = self.cbar_titles[num]
+            axbar = self.fig.add_axes([
+                self.cbar_x,
+                self.cbar_y,
+                self.cbar_width,
+                self.cbar_height])
+
+            cb = self.fig.colorbar(
+                    self.imshow_list[num],
+                    axbar,
+                    orientation='horizontal',)
+
+            # cb.ax.set_xticklabels(['P = 0.05', 'P < 0.01'], color='white')
+
+            cb.outline.set_edgecolor('white')
+            cb.ax.set_title(
+                    self.cbar_title,
+                    fontsize=15, fontweight='bold', color='white')
+            cb.ax.yaxis.set_label_position('left')
 
     def add_cbars_horizontal(self):
         self.cbar_x_steps = 0.2
@@ -158,7 +189,11 @@ class Figure(FigureSettings, FigureNifti):
             dpi=self.dpi)
 
         # figure settings
-        self.fig.subplots_adjust(hspace=0, wspace=0)
+        self.fig.subplots_adjust(
+                hspace=self.hspace,
+                wspace=self.wspace,
+                top=self.top,
+                bottom=self.bottom)
         plt.style.use('dark_background')
 
     def read_data(self):
@@ -170,6 +205,7 @@ class Figure(FigureSettings, FigureNifti):
         # load foreground ata
         self.image_data_list = [nb.load(x).get_data() for x
                                 in self.image_files]
+
 
     def images_mask_out_the_skeleton(self):
         new_images = []
@@ -230,7 +266,25 @@ class Figure(FigureSettings, FigureNifti):
                         vmax=1, alpha=alpha)
                 self.imshow_list.append(img)
 
-    def loop_through_axes_draw_images(self):
+    def loop_through_axes_draw_hist(self):
+        """Loop thorugh each axis drawing figures"""
+
+        # bbox
+        if hasattr(self, 'box_x'):
+            self.image_data_list = [
+                x[self.box_x[0]:self.box_x[1], :, :] \
+                    for x in self.image_data_list]
+
+        if hasattr(self, 'box_y'):
+            self.image_data_list = [
+                x[:, self.box_y[0]:self.box_y[1], :] \
+                    for x in self.image_data_list]
+
+        if hasattr(self, 'box_z'):
+            self.image_data_list = [
+                x[:, :, self.box_z[0]:self.box_z[1]] \
+                    for x in self.image_data_list]
+
         for num, ax in enumerate(np.ravel(self.axes)):
             z_num = self.slice_nums[num]
 
@@ -238,10 +292,7 @@ class Figure(FigureSettings, FigureNifti):
             self.imshow_list = []
 
             for img_num, image in enumerate(self.image_data_list):
-                image_d = self.get_slice(image, z_num)
-                alpha = self.alpha_list[img_num]
-
-                # vmin and vmax
+                # vmin and vmax, which must be consistent across the figures
                 if hasattr(self, 'vmin_list'):
                     vmin = self.vmin_list[img_num]
                     has_vmin = True
@@ -249,10 +300,66 @@ class Figure(FigureSettings, FigureNifti):
                     has_vmin = False
 
                 if hasattr(self, 'vmax_list'):
-                    vmax = self.vmin_list[img_num]
+                    vmax = self.vmax_list[img_num]
                     has_vmax = True
                 else:
                     has_vmax = False
+
+                image_d = self.get_slice(image, z_num)
+                img = sns.distplot(np.ravel(image_d), ax=ax)
+
+                if has_vmin:
+                    ax.set_xlim(vmin, vmax)
+                    ax.set_ylim(0, 0.0001)
+                self.imshow_list.append(img)
+
+    def loop_through_axes_draw_images(self):
+        """Loop thorugh each axis drawing figures"""
+
+        # make zero transparent
+        if self.make_transparent_zero == True:
+            self.image_data_list = [
+                np.where(x == 0, np.nan, x) for x in self.image_data_list]
+
+        # bbox
+        if hasattr(self, 'box_x'):
+            self.image_data_list = [
+                x[self.box_x[0]:self.box_x[1], :, :] \
+                    for x in self.image_data_list]
+
+        if hasattr(self, 'box_y'):
+            self.image_data_list = [
+                x[:, self.box_y[0]:self.box_y[1], :] \
+                    for x in self.image_data_list]
+
+        if hasattr(self, 'box_z'):
+            self.image_data_list = [
+                x[:, :, self.box_z[0]:self.box_z[1]] \
+                    for x in self.image_data_list]
+
+        for num, ax in enumerate(np.ravel(self.axes)):
+            z_num = self.slice_nums[num]
+
+            # background FA map
+            self.imshow_list = []
+
+            for img_num, image in enumerate(self.image_data_list):
+                # vmin and vmax, which must be consistent across the figures
+                if hasattr(self, 'vmin_list'):
+                    vmin = self.vmin_list[img_num]
+                    has_vmin = True
+                else:
+                    has_vmin = False
+
+                if hasattr(self, 'vmax_list'):
+                    vmax = self.vmax_list[img_num]
+                    has_vmax = True
+                else:
+                    has_vmax = False
+
+                image_d = self.get_slice(image, z_num)
+                alpha = self.alpha_list[img_num]
+
 
                 if has_vmin and has_vmax:
                     img = ax.imshow(
@@ -315,7 +422,7 @@ class TbssFigure(Enigma, Figure, FigureNifti):
         self.loop_through_axes_draw_images()
         self.add_cbars_horizontal()
 
-        self.fig.suptitle(self.title, y=0.9, fontsize=25)
+        self.fig.suptitle(self.title, y=0.9, fontsize=self.title_font_size)
         self.fig.savefig(self.output_file, dpi=200)#, bbox_inches='tight')
 
     def create_figure_two_maps_and_overlap(self):
@@ -331,7 +438,7 @@ class TbssFigure(Enigma, Figure, FigureNifti):
         self.get_cbar_horizontal_info()
         self.add_cbars_horizontal()
 
-        self.fig.suptitle(self.title, y=0.9, fontsize=25)
+        self.fig.suptitle(self.title, y=0.9, fontsize=self.title_font_size)
         self.fig.savefig(self.output_file, dpi=200)#, bbox_inches='tight')
 
 
@@ -339,7 +446,14 @@ class SimpleFigure(Figure):
     def __init__(self, **kwargs):
         Figure.__init__(self, **kwargs)
         self.read_data()
-        self.get_center(self.image_data_list[0])
+
+        if hasattr(self, 'slice_num_lowest'):
+            self.slice_nums = [int(x) for x in \
+                np.linspace(self.slice_num_lowest, 
+                            self.slice_num_highest, 
+                            self.ncols * self.nrows)]
+        else:
+            self.get_center(self.image_data_list[0])
 
         # remove negative
         self.alpha_list = [1]
@@ -349,7 +463,27 @@ class SimpleFigure(Figure):
         self.annotate_with_z()
 
         self.cbar_titles = ['intensity']
-        self.add_cbars_horizontal()
+        self.add_intensity_cbars_horizontal()
 
-        self.fig.suptitle(self.title, y=0.9, fontsize=25)
+        self.fig.suptitle(self.title, y=0.90, fontsize=self.title_font_size)
 
+class SimpleHistogram(Figure):
+    def __init__(self, **kwargs):
+        Figure.__init__(self, **kwargs)
+        self.read_data()
+
+        # self.get_center(self.image_data_list[0])
+        
+        self.slice_nums = [int(x) for x in \
+            np.linspace(self.slice_num_lowest, 
+                        self.slice_num_highest, 
+                        self.ncols * self.nrows)]
+        # remove negative
+        self.alpha_list = [1]
+        self.cmap_list = ['coolwarm']
+
+        self.loop_through_axes_draw_hist()
+        self.annotate_with_z()
+
+        plt.style.use('default')
+        self.fig.suptitle(self.title, y=0.90, fontsize=self.title_font_size)
