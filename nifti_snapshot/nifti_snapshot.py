@@ -6,10 +6,8 @@ from pathlib import Path
 import nibabel as nb
 from scipy import ndimage
 import os
-import functools
 
 class Enigma:
-    @functools.cached_property
     def __init__(self):
         self.enigma_dir = Path(os.environ['ENIGMA_dir'])
         self.enigma_fa_loc = self.enigma_dir / 'ENIGMA_DTI_FA.nii.gz'
