@@ -11,7 +11,8 @@ import functools
 class Enigma:
     # @functools.cached_property
     def __init__(self):
-        self.enigma_dir = Path(os.environ['ENIGMA_dir'])
+        # self.enigma_dir = Path(os.environ['ENIGMA_dir'])
+        self.enigma_dir = Path('/data/pnl/soft/pnlpipe3/tbss/data/enigmaDTI')
         self.enigma_fa_loc = self.enigma_dir / 'ENIGMA_DTI_FA.nii.gz'
         self.enigma_fa_data = nb.load(str(self.enigma_fa_loc)).get_data()
         self.enigma_skeleton_mask_loc = self.enigma_dir / \
@@ -46,6 +47,7 @@ class FigureSettings:
         self.cbar_y = 0.03
         self.cbar_height = 0.03
         self.cbar_width = 0.15
+        self.cbar_ticks = [0, 1]
 
     def add_cbars_horizontal(self):
         self.cbar_x_steps = 0.2
@@ -64,7 +66,7 @@ class FigureSettings:
                         self.imshow_list[num],
                         axbar,
                         orientation='horizontal',
-                        ticks=[0, 1])
+                        ticks=self.cbar_ticks)
 
                 cb.ax.set_xticklabels(['P = 0.05', 'P < 0.01'], color='white')
             else:
@@ -116,6 +118,19 @@ class FigureNifti:
         # Get the center slice number
         self.z_slice_center = self.center_of_data[-1]
         self.get_slice_nums()
+
+    def get_center_norm(self, data):
+        # Get the center of data
+        # slices below z=40 have been zeroed in order to move the
+        # center_of_data upwards for better visualization
+        data_zeroed_below = data.copy()
+        self.center_of_data = np.array(
+            ndimage.measurements.center_of_mass(data_zeroed_below)).astype(int)
+
+        # Get the center slice number
+        self.z_slice_center = self.center_of_data[-1]
+        self.get_slice_nums()
+
 
     def get_slice_nums(self):
         self.slice_nums = np.arange(
@@ -202,6 +217,15 @@ class Figure(FigureSettings, FigureNifti):
     def image_mask_out_the_skeleton(self):
         self.image_data = self.transparent_out_the_skeleton(self.image_data)
 
+    def draw_image(self, array, cmap, vmin, vmax):
+        for num, ax in enumerate(np.ravel(self.axes)):
+            z_num = self.slice_nums[num]
+            array_slice = self.get_slice(array, z_num)
+
+            # background FA map
+            ax.imshow(array_slice,cmap=cmap, vmin=vmin, vmax=vmax)
+            ax.axis('off')
+
     def loop_through_axes_draw_bg(self):
         for num, ax in enumerate(np.ravel(self.axes)):
             z_num = self.slice_nums[num]
@@ -221,7 +245,7 @@ class Figure(FigureSettings, FigureNifti):
                     interpolation=None, cmap='ocean')
             ax.axis('off')
 
-    def loop_through_axes_draw_images_corrp_map(self, threshold):
+    def loop_through_axes_draw_images_corrp_map(self, vmin):
         for num, ax in enumerate(np.ravel(self.axes)):
             z_num = self.slice_nums[num]
 
@@ -233,25 +257,29 @@ class Figure(FigureSettings, FigureNifti):
                 img = ax.imshow(
                         image_d,
                         cmap=self.cmap_list[img_num],
-                        vmin=threshold,
+                        vmin=vmin,
                         vmax=1, alpha=alpha)
                 self.imshow_list.append(img)
 
     def loop_through_axes_draw_images(self):
         for num, ax in enumerate(np.ravel(self.axes)):
-            z_num = self.slice_nums[num]
+            try:
+                print(num)
+                z_num = self.slice_nums[num]
 
-            # background FA map
-            self.imshow_list = []
-            for img_num, image in enumerate(self.image_data_list):
-                alpha = self.alpha_list[img_num]
-                image_d = self.get_slice(image, z_num)
-                img = ax.imshow(
-                        image_d,
-                        cmap=self.cmap_list[img_num],
-                        vmin=0,
-                        vmax=1, alpha=alpha)
-                self.imshow_list.append(img)
+                # background FA map
+                self.imshow_list = []
+                for img_num, image in enumerate(self.image_data_list):
+                    alpha = self.alpha_list[img_num]
+                    image_d = self.get_slice(image, z_num)
+                    img = ax.imshow(
+                            image_d,
+                            cmap=self.cmap_list[img_num],
+                            vmin=0,
+                            vmax=1, alpha=alpha)
+                    self.imshow_list.append(img)
+            except:
+                pass
 
     def loop_through_axes_draw_overlap(self):
         image = self.image_data_list[-1]
