@@ -341,9 +341,10 @@ class Figure(FigureSettings, FigureNifti):
         """Loop thorugh each axis drawing figures"""
 
         # make zero transparent
-        if self.make_transparent_zero == True:
-            self.image_data_list = [
-                np.where(x == 0, np.nan, x) for x in self.image_data_list]
+        if hasattr(self, 'make_transparent_zero'):
+            if self.make_transparent_zero == True:
+                self.image_data_list = [
+                    np.where(x == 0, np.nan, x) for x in self.image_data_list]
 
         # bbox
         if hasattr(self, 'box_x'):
