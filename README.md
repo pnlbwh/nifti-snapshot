@@ -40,6 +40,13 @@ pathlib2==2.3.3
 matplotlib==3.0.3
 ```
 
+## Single image examples
+
+### Link to a single image examples
+
+[Jupyter notebook link](docs/single_image_example.ipynb)
+
+
 
 ## TBSS figures
 
@@ -132,3 +139,7 @@ tbssFigure = nifti_snapshot.TbssFigure(
     title='Significant changes in FA and FAt in group A')
 tbssFigure.create_figure_two_maps_and_overlap()
 ```
+
+
+
+
