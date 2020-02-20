@@ -96,7 +96,6 @@ class FigureSettings:
                         axbar,
                         orientation='horizontal',
                         ticks=self.cbar_ticks)
-
                 cb.ax.set_xticklabels(['P = 0.05', 'P < 0.01'], color='white')
             else:
                 cb = self.fig.colorbar(
@@ -105,6 +104,7 @@ class FigureSettings:
                         orientation='horizontal',
                         boundaries=[0.999, 1],
                         ticks=[])
+                cb.ax.set_xticklabels(['P = 0.05', 'P < 0.01'], color='white')
 
             cb.outline.set_edgecolor('white')
             cb.ax.set_title(
@@ -158,6 +158,23 @@ class FigureNifti:
         # Get the center slice number
         self.z_slice_center = self.center_of_data[-1]
         self.get_slice_nums()
+
+    def get_slice_nums_focused(self, data, padding=2):
+        # Get the center of data
+        # slices below z=40 have been zeroed in order to move the
+        # center_of_data upwards for better visualization
+        self.roi_bbox = {}
+        for axis, axis_num in zip(['x','y','z'],
+                                  [0,1,2]):
+            self.roi_bbox[axis+'_min'] = np.where(data!=0)[axis_num].min() - \
+                                         padding
+            self.roi_bbox[axis+'_max'] = np.where(data!=0)[axis_num].max() + \
+                                         padding
+
+        self.slice_nums = np.linspace(self.roi_bbox['z_min'],
+                                      self.roi_bbox['z_max'],
+                                      self.nrows * self.ncols).astype(int)
+
 
 
     def get_slice_nums(self):
@@ -438,6 +455,10 @@ class TbssFigure(Enigma, Figure, FigureNifti):
         self.enigma_skeleton_data = self.transparent_mask(
             self.enigma_skeleton_data)
         self.read_data()
+
+        # tmp to do change here
+        self.vmin_list = [0] * 2
+        self.vmax_list = [1] * 2
 
     def create_figure_one_map(self):
         self.images_mask_out_the_zero()
