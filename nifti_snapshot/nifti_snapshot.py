@@ -7,35 +7,30 @@ import nibabel as nb
 from scipy import ndimage
 import os
 import seaborn as sns
+from nifti_snapshot_utils import script_dir, lib_dir, root_dir
 
 class Enigma:
     def __init__(self):
-        # self.enigma_dir = Path(os.environ['ENIGMA_dir'])
-        self.enigma_dir = Path('/data/pnl/soft/pnlpipe3/tbss/data/enigmaDTI')
-        self.enigma_fa_loc = self.enigma_dir / 'ENIGMA_DTI_FA.nii.gz'
-        self.enigma_fa_data = nb.load(str(self.enigma_fa_loc)).get_data()
-        self.enigma_skeleton_mask_loc = self.enigma_dir / \
+        """ENIGMA template"""
+        self.enigma_dir = root_dir / 'data' / 'enigmaDTI'
+        self.template_fa_loc = self.enigma_dir / 'ENIGMA_DTI_FA.nii.gz'
+        self.template_skeleton_loc = self.enigma_dir / \
             'ENIGMA_DTI_FA_skeleton_mask.nii.gz'
-        self.enigma_skeleton_data = nb.load(
-            str(self.enigma_skeleton_mask_loc)).get_data()
 
 class Fsl:
     def __init__(self):
+        """FSL template"""
         self.fsldir = os.environ['FSLDIR']
-        self.fmrib_fa_loc = Path(self.fsldir) / \
+        self.template_fa_loc = Path(self.fsldir) / \
             'data/standard/FMRIB58_FA_1mm.nii.gz'
-        self.fmrib_fa_data = nb.load(str(self.fmrib_fa_loc)).get_data()
-
-        self.fmrib_skeleton_loc = Path(self.fsldir) / \
+        self.template_skeleton_loc = Path(self.fsldir) / \
             'data/standard/FMRIB58_FA-skeleton_1mm.nii.gz'
-        self.fmrib_skeleton_data = nb.load(
-            str(self.fmrib_skeleton_loc)).get_data()
 
 class FigureSettings:
     def __init__(self):
+        """Figure default settings"""
         self.ncols = 5
         self.nrows = 4
-        self.nslice = self.ncols * self.nrows
         self.size_w = 4
         self.size_h = 4
         self.slice_gap = 3
@@ -47,6 +42,7 @@ class FigureSettings:
         self.title_font_size = 25
 
     def get_cbar_horizontal_info(self):
+        """Default horizontal cbar settings"""
         self.cbar_x = 0.25
         self.cbar_y = 0.03
         self.cbar_height = 0.03
@@ -58,7 +54,11 @@ class FigureSettings:
 
         for num, image_data in enumerate(self.image_data_list):
             # x, y, width, height
-            cbar_title = self.cbar_titles[num]
+            if hasattr(self, 'cbar_titles'):
+                cbar_title = self.cbar_titles[num]
+            else:
+                cbar_title = f'image {num}'
+
             axbar = self.fig.add_axes([
                 self.cbar_x,
                 self.cbar_y,
@@ -79,11 +79,16 @@ class FigureSettings:
             cb.ax.yaxis.set_label_position('left')
 
     def add_cbars_horizontal(self):
+        """Add horizontal cbars for tbss stat maps"""
         self.cbar_x_steps = 0.2
 
         for num, image_data in enumerate(self.image_data_list):
             # x, y, width, height
-            cbar_title = self.cbar_titles[num]
+            if hasattr(self, 'cbar_titles'):
+                cbar_title = self.cbar_titles[num]
+            else:
+                cbar_title = f'image {num}'
+
             axbar = self.fig.add_axes([
                 self.cbar_x,
                 self.cbar_y,
@@ -117,9 +122,9 @@ class FigureNifti:
     def get_slice(self, data, z_num):
         return np.flipud(data[:, :, z_num].T)
 
-    def transparent_mask(self, mask_data):
-        mask_data = np.where(mask_data < 1, np.nan, mask_data)
-        return mask_data
+    def make_lt_one_transparent(self, data):
+        data = np.where(data < 1, np.nan, data)
+        return data
 
     def transparent_zero(self, data):
         data = np.where(data == 0, np.nan, data)
@@ -131,7 +136,7 @@ class FigureNifti:
         return data
 
     def transparent_out_the_skeleton(self, data):
-        data = np.where(self.enigma_skeleton_data == 1, data, np.nan)
+        data = np.where(self.template_skeleton_data == 1, data, np.nan)
         return data
 
     def get_center(self, data):
@@ -147,17 +152,23 @@ class FigureNifti:
         self.z_slice_center = self.center_of_data[-1]
         self.get_slice_nums()
 
-    def get_center_norm(self, data):
-        # Get the center of data
-        # slices below z=40 have been zeroed in order to move the
-        # center_of_data upwards for better visualization
-        data_zeroed_below = data.copy()
-        self.center_of_data = np.array(
-            ndimage.measurements.center_of_mass(data_zeroed_below)).astype(int)
+    def get_slice_nums_non_zero_linspace(self):
+        """Get slice_nums based on the zmin and zmax"""
+        # get nonzero z coordinates
+        nonzero_coord_z = np.nonzero(self.image_data_list[0])[-1]
+        zmin = nonzero_coord_z.min()
+        zmax = nonzero_coord_z.max()
 
-        # Get the center slice number
-        self.z_slice_center = self.center_of_data[-1]
-        self.get_slice_nums()
+        # if there is enough nonzero slices to show
+        # z_slices = zmax - zmin
+        # if (zmax - zmin) > self.slice_num:
+        self.slice_nums = np.linspace(zmin, zmax, self.slice_num).astype(int)
+        # else:
+            # zmin_new = zmin - (self.slice_num - z_slices)
+            # self.slice_nums = np.linspace(zmin_new, zmax, self.slice_num)
+
+        # make integer array
+        # self.slice_nums = self.slice_nums.astype(int)
 
     def get_slice_nums_focused(self, data, padding=2):
         # Get the center of data
@@ -175,12 +186,17 @@ class FigureNifti:
                                       self.roi_bbox['z_max'],
                                       self.nrows * self.ncols).astype(int)
 
-
-
     def get_slice_nums(self):
+        """Get a list of slice numbers automatically"""
+
+        # TODO : this does not work with non-enigma template TBSS currently
+        # self.slice_nums = np.arange(
+            # self.z_slice_center - (self.slice_num * self.slice_gap),
+            # self.z_slice_center + (self.slice_num * self.slice_gap),
+            # self.slice_gap)[::2]
         self.slice_nums = np.arange(
-            self.z_slice_center - (self.nslice * self.slice_gap),
-            self.z_slice_center + (self.nslice * self.slice_gap),
+            self.z_slice_center - (self.slice_num * self.slice_gap),
+            self.z_slice_center + (self.slice_num * self.slice_gap),
             self.slice_gap)[::2]
 
     def annotate_with_z(self):
@@ -207,10 +223,14 @@ class FigureNifti:
 class Figure(FigureSettings, FigureNifti):
     def __init__(self, **kwargs):
         FigureSettings.__init__(self)
-        self.get_cbar_horizontal_info()
+
         for key, value in kwargs.items():
             print(f"\t{key} : {value}")
             setattr(self, key, value)
+
+        # The number of slices to be shown in the output figures depend on the
+        # number of rows and columns
+        self.slice_num = self.nrows * self.ncols
 
         # create fig and axes
         self.fig, self.axes = plt.subplots(
@@ -220,13 +240,18 @@ class Figure(FigureSettings, FigureNifti):
                      self.size_h * self.nrows),
             dpi=self.dpi)
 
+        self.get_cbar_horizontal_info()
+
         # figure settings
         self.fig.subplots_adjust(
                 hspace=self.hspace,
                 wspace=self.wspace,
                 top=self.top,
                 bottom=self.bottom)
+
+        # dark background
         plt.style.use('dark_background')
+
 
     def read_data(self):
         # load background data
@@ -234,10 +259,10 @@ class Figure(FigureSettings, FigureNifti):
             self.background_data_list = [nb.load(x).get_data() for x
                                          in self.background_files]
 
-        # load foreground ata
-        self.image_data_list = [nb.load(x).get_data() for x
-                                in self.image_files]
-
+        # load foreground data
+        if hasattr(self, 'image_files'):
+            self.image_data_list = [nb.load(x).get_data() for x
+                                    in self.image_files]
 
     def images_mask_out_the_skeleton(self):
         new_images = []
@@ -272,23 +297,19 @@ class Figure(FigureSettings, FigureNifti):
             ax.imshow(array_slice,cmap=cmap, vmin=vmin, vmax=vmax)
             ax.axis('off')
 
-    def loop_through_axes_draw_bg(self):
+    def loop_through_axes_draw_bg_tbss(self):
         for num, ax in enumerate(np.ravel(self.axes)):
             z_num = self.slice_nums[num]
-            enigma_fa_d = self.get_slice(self.enigma_fa_data, z_num)
-            enigma_skeleton_d = self.get_slice(
-                    self.enigma_skeleton_data,
-                    z_num)
+            # here bg is automatically set as the enigma files
+            fa_d = self.get_slice(self.template_fa_data, z_num)
+            skeleton_d = self.get_slice(self.template_skeleton_data, z_num)
 
             # background FA map
-            img = ax.imshow(
-                    enigma_fa_d,
-                    cmap='gray')
+            img = ax.imshow(fa_d, cmap='gray')
 
             # background skeleton
-            img = ax.imshow(
-                    enigma_skeleton_d,
-                    interpolation=None, cmap='ocean')
+            # TODO: interpolation?
+            img = ax.imshow(skeleton_d, interpolation=None, cmap='ocean')
             ax.axis('off')
 
     def loop_through_axes_draw_images_corrp_map(self, vmin):
@@ -355,7 +376,7 @@ class Figure(FigureSettings, FigureNifti):
                 self.imshow_list.append(img)
 
     def loop_through_axes_draw_images(self):
-        """Loop thorugh each axis drawing figures"""
+        """TODO: make this clean Loop thorugh each axis drawing figures"""
 
         # make zero transparent
         if hasattr(self, 'make_transparent_zero'):
@@ -400,32 +421,41 @@ class Figure(FigureSettings, FigureNifti):
                     has_vmax = False
 
                 image_d = self.get_slice(image, z_num)
-                alpha = self.alpha_list[img_num]
+
+                if hasattr(self, 'alpha_list'):
+                    alpha = self.alpha_list[img_num]
+                else:
+                    alpha = 1
+
+                if hasattr(self, 'cmap_list'):
+                    cmap = self.cmap_list[img_num]
+                else:
+                    cmap = 'autumn'
 
 
                 if has_vmin and has_vmax:
                     img = ax.imshow(
                         image_d,
-                        cmap=self.cmap_list[img_num],
+                        cmap=cmap,
                         vmin=vmin,
                         vmax=vmax,
                         alpha=alpha)
                 elif has_vmin and has_vmax == False:
                     img = ax.imshow(
                         image_d,
-                        cmap=self.cmap_list[img_num],
+                        cmap=cmap,
                         vmin=vmin,
                         alpha=alpha)
                 elif has_vmax and has_vmin == False:
                     img = ax.imshow(
                         image_d,
-                        cmap=self.cmap_list[img_num],
+                        cmap=cmap,
                         vmax=vmax,
                         alpha=alpha)
                 else:
                     img = ax.imshow(
                         image_d,
-                        cmap=self.cmap_list[img_num],
+                        cmap=cmap,
                         alpha=alpha)
                 self.imshow_list.append(img)
             ax.axis('off')
@@ -447,51 +477,63 @@ class Figure(FigureSettings, FigureNifti):
     # def create_figure_
 
 class TbssFigure(Enigma, Figure, FigureNifti):
-    def __init__(self, **kwargs):
-        Enigma.__init__(self)
-        Fsl.__init__(self)
-        Figure.__init__(self, **kwargs)
-        self.get_center(self.enigma_fa_data)
-        self.enigma_skeleton_data = self.transparent_mask(
-            self.enigma_skeleton_data)
-        self.read_data()
+    """TBSS related figure"""
+    def __init__(self, template='enigma', **kwargs):
+        # define template
+        if template.lower() == 'enigma':
+            # set enigma related attributes
+            Enigma.__init__(self)
+        elif template.lower() == 'fsl':
+            # set FSL related attributes
+            Fsl.__init__(self)
+        else:
+            self.template_fa_loc = kwargs.get('template_FA')
+            self.template_skeleton_loc = kwargs.get('template_skeleton')
 
-        # tmp to do change here
-        self.vmin_list = [0] * 2
-        self.vmax_list = [1] * 2
+        # load FA and skeleton mask templates
+        self.template_fa_img = nb.load(str(self.template_fa_loc))
+        self.template_fa_data = self.template_fa_img.get_fdata()
+        self.template_skeleton_img = nb.load(str(self.template_skeleton_loc))
+        self.template_skeleton_data = self.template_skeleton_img.get_fdata()
+        self.template_skeleton_data = self.make_lt_one_transparent(
+            self.template_skeleton_data)
+
+        # register attributes given when initiating TbssFigure class
+        Figure.__init__(self, **kwargs)
+
+        # read data given when creating initiating TbssFigure
+        # read in the list of self.background_files and self.image_files
+        # if it exists
+        self.read_data()
+        self.get_slice_nums_non_zero_linspace()
+
+        self.images_mask_out_the_zero()
+        self.loop_through_axes_draw_bg_tbss()
+        self.annotate_with_z()
+
+        self.loop_through_axes_draw_images()
 
     def create_figure_one_map(self):
-        self.images_mask_out_the_zero()
-        self.loop_through_axes_draw_bg()
-        self.annotate_with_z()
-
-        self.loop_through_axes_draw_images()
         self.add_cbars_horizontal()
-
         self.fig.suptitle(self.title, y=0.9, fontsize=self.title_font_size)
-        self.fig.savefig(self.output_file, dpi=200)#, bbox_inches='tight')
+        self.fig.savefig(self.output_file, dpi=self.dpi)#, bbox_inches='tight')
 
     def create_figure_two_maps_and_overlap(self):
-        self.images_mask_out_the_zero()
-        self.loop_through_axes_draw_bg()
-        self.annotate_with_z()
-
-        self.loop_through_axes_draw_images()
         # estimate overlap
         self.get_overlap_between_maps()
         self.loop_through_axes_draw_overlap()
 
-        self.get_cbar_horizontal_info()
         self.add_cbars_horizontal()
 
         self.fig.suptitle(self.title, y=0.9, fontsize=self.title_font_size)
-        self.fig.savefig(self.output_file, dpi=200)#, bbox_inches='tight')
-
+        self.fig.savefig(self.output_file, dpi=self.dpi)#, bbox_inches='tight')
 
 class SimpleFigure(Figure):
     def __init__(self, **kwargs):
         Figure.__init__(self, **kwargs)
         self.read_data()
+
+        self.get_slice_nums_non_zero_linspace()
 
         if hasattr(self, 'slice_num_lowest'):
             self.slice_nums = [int(x) for x in \
