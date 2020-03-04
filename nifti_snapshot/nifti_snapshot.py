@@ -8,6 +8,7 @@ from scipy import ndimage
 import os
 import seaborn as sns
 from nifti_snapshot_utils import script_dir, lib_dir, root_dir
+import matplotlib.ticker as ticker
 
 class Enigma:
     def __init__(self):
@@ -52,12 +53,15 @@ class FigureSettings:
     def add_intensity_cbars_horizontal(self):
         self.cbar_x_steps = 0.2
 
+        if len(self.image_data_list) == 1:
+            self.cbar_width = 0.5
+
         for num, image_data in enumerate(self.image_data_list):
             # x, y, width, height
             if hasattr(self, 'cbar_titles'):
                 cbar_title = self.cbar_titles[num]
             else:
-                cbar_title = f'image {num}'
+                cbar_title = f'Image {num+1}'
 
             axbar = self.fig.add_axes([
                 self.cbar_x,
@@ -74,7 +78,7 @@ class FigureSettings:
 
             cb.outline.set_edgecolor('white')
             cb.ax.set_title(
-                    self.cbar_title,
+                    cbar_title,
                     fontsize=15, fontweight='bold', color='white')
             cb.ax.yaxis.set_label_position('left')
 
@@ -82,12 +86,15 @@ class FigureSettings:
         """Add horizontal cbars for tbss stat maps"""
         self.cbar_x_steps = 0.2
 
+        if len(self.image_data_list) == 1:
+            self.cbar_width = 0.5
+
         for num, image_data in enumerate(self.image_data_list):
             # x, y, width, height
             if hasattr(self, 'cbar_titles'):
                 cbar_title = self.cbar_titles[num]
             else:
-                cbar_title = f'image {num}'
+                cbar_title = f'Image {num+1}'
 
             axbar = self.fig.add_axes([
                 self.cbar_x,
@@ -108,7 +115,8 @@ class FigureSettings:
                         axbar,
                         orientation='horizontal',
                         boundaries=[0.999, 1],
-                        ticks=[])
+                        ticks=self.cbar_ticks)
+                # cb.ax.set_major_locator(ticker.LinearLocator(2))
                 cb.ax.set_xticklabels(['P = 0.05', 'P < 0.01'], color='white')
 
             cb.outline.set_edgecolor('white')
@@ -255,12 +263,14 @@ class Figure(FigureSettings, FigureNifti):
 
     def read_data(self):
         # load background data
-        if hasattr(self, 'background_files'):
+        if hasattr(self, 'background_files') and \
+                not hasattr(self, 'background_data_list'):
             self.background_data_list = [nb.load(x).get_data() for x
                                          in self.background_files]
 
         # load foreground data
-        if hasattr(self, 'image_files'):
+        if hasattr(self, 'image_files') and \
+                not hasattr(self, 'image_data_list'):
             self.image_data_list = [nb.load(x).get_data() for x
                                     in self.image_files]
 
@@ -537,15 +547,17 @@ class SimpleFigure(Figure):
 
         if hasattr(self, 'slice_num_lowest'):
             self.slice_nums = [int(x) for x in \
-                np.linspace(self.slice_num_lowest, 
-                            self.slice_num_highest, 
+                np.linspace(self.slice_num_lowest,
+                            self.slice_num_highest,
                             self.ncols * self.nrows)]
         else:
-            self.get_center(self.image_data_list[0])
+            pass
+            # self.get_center(self.image_data_list[0])
 
         # remove negative
         self.alpha_list = [1]
-        self.cmap_list = ['coolwarm']
+        # self.cmap_list = ['coolwarm']
+        self.cmap_list = ['gray']
 
         self.loop_through_axes_draw_images()
         self.annotate_with_z()
@@ -554,6 +566,7 @@ class SimpleFigure(Figure):
         self.add_intensity_cbars_horizontal()
 
         self.fig.suptitle(self.title, y=0.90, fontsize=self.title_font_size)
+        self.fig.savefig(self.output_file, dpi=self.dpi)#, bbox_inches='tight')
 
 class SimpleHistogram(Figure):
     def __init__(self, **kwargs):
@@ -566,6 +579,7 @@ class SimpleHistogram(Figure):
             np.linspace(self.slice_num_lowest, 
                         self.slice_num_highest, 
                         self.ncols * self.nrows)]
+
         # remove negative
         self.alpha_list = [1]
         self.cmap_list = ['coolwarm']
