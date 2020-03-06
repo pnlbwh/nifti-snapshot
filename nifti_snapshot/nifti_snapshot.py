@@ -3,11 +3,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
-import nibabel as nb
 from scipy import ndimage
 import os
 import seaborn as sns
 from nifti_snapshot_utils import script_dir, lib_dir, root_dir
+from nifti_snapshot_utils import get_nifti_data, get_nifti_img_data
+
 import matplotlib.ticker as ticker
 
 class Enigma:
@@ -265,13 +266,13 @@ class Figure(FigureSettings, FigureNifti):
         # load background data
         if hasattr(self, 'background_files') and \
                 not hasattr(self, 'background_data_list'):
-            self.background_data_list = [nb.load(x).get_data() for x
+            self.background_data_list = [get_nifti_data(x) for x
                                          in self.background_files]
 
         # load foreground data
         if hasattr(self, 'image_files') and \
                 not hasattr(self, 'image_data_list'):
-            self.image_data_list = [nb.load(x).get_data() for x
+            self.image_data_list = [get_nifti_data(x) for x
                                     in self.image_files]
 
     def images_mask_out_the_skeleton(self):
@@ -501,10 +502,8 @@ class TbssFigure(Enigma, Figure, FigureNifti):
             self.template_skeleton_loc = kwargs.get('template_skeleton')
 
         # load FA and skeleton mask templates
-        self.template_fa_img = nb.load(str(self.template_fa_loc))
-        self.template_fa_data = self.template_fa_img.get_fdata()
-        self.template_skeleton_img = nb.load(str(self.template_skeleton_loc))
-        self.template_skeleton_data = self.template_skeleton_img.get_fdata()
+        self.template_fa_data = get_nifti_data(self.template_fa_loc)
+        self.template_skeleton_data = get_nifti_data(self.template_skeleton_loc)
         self.template_skeleton_data = self.make_lt_one_transparent(
             self.template_skeleton_data)
 
