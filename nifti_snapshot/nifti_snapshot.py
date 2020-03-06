@@ -7,8 +7,12 @@ import nibabel as nb
 from scipy import ndimage
 import os
 import seaborn as sns
-from nifti_snapshot_utils import script_dir, lib_dir, root_dir
+# from nifti_snapshot_utils import script_dir, lib_dir, root_dir
 import matplotlib.ticker as ticker
+
+script_dir = Path(__file__).absolute()
+lib_dir = script_dir.parent
+root_dir = lib_dir.parent
 
 class Enigma:
     def __init__(self):
@@ -107,17 +111,20 @@ class FigureSettings:
                         self.imshow_list[num],
                         axbar,
                         orientation='horizontal',
-                        ticks=self.cbar_ticks)
-                cb.ax.set_xticklabels(['P = 0.05', 'P < 0.01'], color='white')
+                        ticks=[0.95,1])
+                cb.ax.set_xticklabels(
+                        ['P = 0.05', 'P < 0.01'],
+                        color='white',
+                        fontsize=15)
             else:
                 cb = self.fig.colorbar(
                         self.imshow_list[num],
                         axbar,
                         orientation='horizontal',
                         boundaries=[0.999, 1],
-                        ticks=self.cbar_ticks)
+                        ticks=[])
                 # cb.ax.set_major_locator(ticker.LinearLocator(2))
-                cb.ax.set_xticklabels(['P = 0.05', 'P < 0.01'], color='white')
+                # cb.ax.set_xticklabels(['P = 0.05', 'P < 0.01'], color='white')
 
             cb.outline.set_edgecolor('white')
             cb.ax.set_title(
@@ -489,6 +496,7 @@ class Figure(FigureSettings, FigureNifti):
 class TbssFigure(Enigma, Figure, FigureNifti):
     """TBSS related figure"""
     def __init__(self, template='enigma', **kwargs):
+        """Requires template input"""
         # define template
         if template.lower() == 'enigma':
             # set enigma related attributes
@@ -517,6 +525,12 @@ class TbssFigure(Enigma, Figure, FigureNifti):
         self.read_data()
         self.get_slice_nums_non_zero_linspace()
 
+        # for tbss stats map cbar_ticks
+        self.vmin_list = np.tile(0.95, len(self.image_data_list))
+        self.vmax_list = np.tile(1, len(self.image_data_list))
+
+        self.cbar_ticks = [0.95, 1]
+
         self.images_mask_out_the_zero()
         self.loop_through_axes_draw_bg_tbss()
         self.annotate_with_z()
@@ -525,17 +539,16 @@ class TbssFigure(Enigma, Figure, FigureNifti):
 
     def create_figure_one_map(self):
         self.add_cbars_horizontal()
-        self.fig.suptitle(self.title, y=0.9, fontsize=self.title_font_size)
+        self.fig.suptitle(self.title, y=0.95, fontsize=self.title_font_size)
         self.fig.savefig(self.output_file, dpi=self.dpi)#, bbox_inches='tight')
 
     def create_figure_two_maps_and_overlap(self):
         # estimate overlap
         self.get_overlap_between_maps()
         self.loop_through_axes_draw_overlap()
-
         self.add_cbars_horizontal()
 
-        self.fig.suptitle(self.title, y=0.9, fontsize=self.title_font_size)
+        self.fig.suptitle(self.title, y=0.95, fontsize=self.title_font_size)
         self.fig.savefig(self.output_file, dpi=self.dpi)#, bbox_inches='tight')
 
 class SimpleFigure(Figure):
