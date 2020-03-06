@@ -7,7 +7,7 @@ from scipy import ndimage
 import os
 import seaborn as sns
 
-from nifti_snapshot_utils import get_nifti_data, get_nifti_img_data
+from .nifti_snapshot_utils import get_nifti_data, get_nifti_img_data
 
 import matplotlib.ticker as ticker
 
