@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
 import nibabel as nb
+from pathlib import Path
+
+script_dir = Path(__file__).absolute()
+lib_dir = script_dir.parent
+root_dir = lib_dir.parent
 
 def get_nifti_data(img_loc):
     """return matrix from nibabel loaded nifti

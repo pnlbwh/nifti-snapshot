@@ -8,12 +8,10 @@ import os
 import seaborn as sns
 
 from .nifti_snapshot_utils import get_nifti_data, get_nifti_img_data
+from .nifti_snapshot_utils import script_dir, lib_dir, root_dir
 
 import matplotlib.ticker as ticker
 
-script_dir = Path(__file__).absolute()
-lib_dir = script_dir.parent
-root_dir = lib_dir.parent
 
 class Enigma:
     def __init__(self):
@@ -126,6 +124,43 @@ class FigureSettings:
                         ticks=[])
                 # cb.ax.set_major_locator(ticker.LinearLocator(2))
                 # cb.ax.set_xticklabels(['P = 0.05', 'P < 0.01'], color='white')
+
+            cb.outline.set_edgecolor('white')
+            cb.ax.set_title(
+                    cbar_title,
+                    fontsize=15, fontweight='bold', color='white')
+            cb.ax.yaxis.set_label_position('left')
+            self.cbar_x += self.cbar_x_steps
+
+    def add_cbars_horizontal_tbss_filled(self):
+        """Add horizontal cbars for tbss stat maps"""
+        self.cbar_x_steps = 0.2
+
+        if len(self.image_data_list) == 1:
+            self.cbar_width = 0.5
+
+        for num, image_data in enumerate(self.image_data_list):
+            # x, y, width, height
+            if hasattr(self, 'cbar_titles'):
+                cbar_title = self.cbar_titles[num]
+            else:
+                cbar_title = f'Image {num+1}'
+
+            axbar = self.fig.add_axes([
+                self.cbar_x,
+                self.cbar_y,
+                self.cbar_width,
+                self.cbar_height])
+
+            cb = self.fig.colorbar(
+                    self.imshow_list[num],
+                    axbar,
+                    orientation='horizontal',
+                    ticks=[0, 1])
+            cb.ax.set_xticklabels(
+                    ['P = 0.05', 'P < 0.01'],
+                    color='white',
+                    fontsize=15)
 
             cb.outline.set_edgecolor('white')
             cb.ax.set_title(
@@ -320,14 +355,18 @@ class Figure(FigureSettings, FigureNifti):
             z_num = self.slice_nums[num]
             # here bg is automatically set as the enigma files
             fa_d = self.get_slice(self.template_fa_data, z_num)
-            skeleton_d = self.get_slice(self.template_skeleton_data, z_num)
+            skeleton_d = self.get_slice(self.template_skeleton_data, 
+                                        z_num)
 
             # background FA map
             img = ax.imshow(fa_d, cmap='gray')
 
             # background skeleton
             # TODO: interpolation?
-            img = ax.imshow(skeleton_d, interpolation=None, cmap='ocean')
+            img = ax.imshow(skeleton_d,
+                    interpolation=None,
+                    cmap='Greens_r')
+            # img = ax.imshow(skeleton_d, cmap='Greens')
             ax.axis('off')
 
     def loop_through_axes_draw_images_corrp_map(self, vmin):
@@ -418,12 +457,14 @@ class Figure(FigureSettings, FigureNifti):
                 x[:, :, self.box_z[0]:self.box_z[1]] \
                     for x in self.image_data_list]
 
+        # loop through slices
         for num, ax in enumerate(np.ravel(self.axes)):
             z_num = self.slice_nums[num]
 
             # background FA map
             self.imshow_list = []
 
+            # loop through images
             for img_num, image in enumerate(self.image_data_list):
                 # vmin and vmax, which must be consistent across the figures
                 if hasattr(self, 'vmin_list'):
@@ -525,7 +566,11 @@ class TbssFigure(Enigma, Figure, FigureNifti):
         self.get_slice_nums_non_zero_linspace()
 
         # for tbss stats map cbar_ticks
-        self.vmin_list = np.tile(0.95, len(self.image_data_list))
+        
+        if kwargs.get('tbss_filled') == True: #TBSS filled
+            self.vmin_list = np.tile(0, len(self.image_data_list))
+        else:
+            self.vmin_list = np.tile(0.95, len(self.image_data_list))
         self.vmax_list = np.tile(1, len(self.image_data_list))
 
         self.cbar_ticks = [0.95, 1]
