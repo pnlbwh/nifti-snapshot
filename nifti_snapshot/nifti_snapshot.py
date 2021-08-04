@@ -7,10 +7,11 @@ from scipy import ndimage
 import os
 import seaborn as sns
 
-from .nifti_snapshot_utils import get_nifti_data, get_nifti_img_data
-from .nifti_snapshot_utils import script_dir, lib_dir, root_dir
+from nifti_snapshot.nifti_snapshot_utils import get_nifti_data, get_nifti_img_data
+from nifti_snapshot.nifti_snapshot_utils import script_dir, lib_dir, root_dir
 
 import matplotlib.ticker as ticker
+from typing import List
 
 
 class Enigma:
@@ -304,7 +305,7 @@ class Figure(FigureSettings, FigureNifti):
         plt.style.use('dark_background')
 
 
-    def read_data(self):
+    def read_data(self, volumes: List[int] = None):
         # load background data
         if hasattr(self, 'background_files') and \
                 not hasattr(self, 'background_data_list'):
@@ -316,6 +317,18 @@ class Figure(FigureSettings, FigureNifti):
                 not hasattr(self, 'image_data_list'):
             self.image_data_list = [get_nifti_data(x) for x
                                     in self.image_files]
+
+        # if 4d, force to visualize the first volume
+        if volumes is not None or \
+                any([len(x.shape) == 4 for x in self.image_data_list]):
+            volumes = [0 for x in self.image_data_list] if volumes is None \
+                    else volumes
+            new_image_data_list = []
+            for image_data, vol in zip(self.image_data_list, volumes):
+                image_data = image_data[:, :, :, vol] \
+                        if len(image_data.shape) == 4 else image_data
+                new_image_data_list.append(image_data)
+            self.image_data_list = new_image_data_list
 
     def images_mask_out_the_skeleton(self):
         new_images = []
@@ -598,7 +611,8 @@ class TbssFigure(Enigma, Figure, FigureNifti):
 class SimpleFigure(Figure):
     def __init__(self, **kwargs):
         Figure.__init__(self, **kwargs)
-        self.read_data()
+
+        self.read_data(kwargs.get('volumes', None))
 
         self.get_slice_nums_non_zero_linspace()
 
@@ -616,6 +630,15 @@ class SimpleFigure(Figure):
         # self.cmap_list = ['coolwarm']
         self.cmap_list = ['gray']
 
+        if not hasattr(self, 'vmin_list') and not hasattr(self, 'vmax_list'):
+            percentile = kwargs.get('percentile', [5, 95])
+            self.vmin_list = []
+            self.vmax_list = []
+            for image_data in self.image_data_list:
+                self.vmin_list.append(
+                        np.percentile(image_data, percentile[0]))
+                self.vmax_list.append(np.percentile(image_data, percentile[1]))
+
         self.loop_through_axes_draw_images()
         self.annotate_with_z()
 
@@ -623,7 +646,8 @@ class SimpleFigure(Figure):
         self.add_intensity_cbars_horizontal()
 
         self.fig.suptitle(self.title, y=0.90, fontsize=self.title_font_size)
-        self.fig.savefig(self.output_file, dpi=self.dpi)#, bbox_inches='tight')
+        self.fig.savefig(self.output_file, dpi=self.dpi)  #, bbox_inches='tight')
+
 
 class SimpleHistogram(Figure):
     def __init__(self, **kwargs):

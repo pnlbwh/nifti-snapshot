@@ -1,5 +1,5 @@
 #!/data/pnl/kcho/anaconda3/bin/python
-import nifti_snapshot
+from nifti_snapshot import nifti_snapshot
 from pathlib import Path
 import matplotlib.pyplot as plt
 import argparse
@@ -17,6 +17,12 @@ if __name__ == '__main__':
                            nargs='+',
                            help='Nifti image. One or more than one location of'
                                 ' images')
+
+    argparser.add_argument("--volumes", "-v",
+                           type=int,
+                           nargs='+',
+                           help='Volume to snapshot from, if the input is 4d '
+                                'image')
 
     argparser.add_argument("--tbss", "-tbss",
                            action='store_true',
@@ -47,6 +53,13 @@ if __name__ == '__main__':
     argparser.add_argument("--title", "-t",
                            type=str,
                            help='Title on top of the image')
+
+    argparser.add_argument("--intensity_percentile", "-ip",
+                           type=int,
+                           nargs='+',
+                           default=(5, 95),
+                           help='min and max percentile to be used '
+                                'when visualizing the data')
 
     argparser.add_argument("--cbar_title", "-ct",
                            type=str,
@@ -99,4 +112,17 @@ if __name__ == '__main__':
                 cbar_width=0.3)
 
             tbssFigure.create_figure_one_map()
+    else:
+        fig = nifti_snapshot.SimpleFigure(
+        image_files = args.input,
+        title = args.title,
+        make_transparent_zero = True,
+        cbar_width = 0.5,
+        cbar_title = args.cbar_title,
+        output_file = args.output_file,
+        volumes = args.volumes,
+        percentile = args.intensity_percentile
 
+        # vmin_list = [-100],
+        # vmax_list = [100],
+    )
