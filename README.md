@@ -5,7 +5,7 @@
 `nifti-snapshot` is a tool to quickly capture nifti image as a `png` or
 `jpeg` figures.
 
-For full documentation: [Here](docs/single_image_example.ipynb)
+For full documentation: [Here](https://nifti-snapshot.readthedocs.io/en/latest/)
 
 
 ## TBSS figures
