@@ -15,7 +15,7 @@ setup(
     author='kcho',
     author_email='kevincho@bwh.harvard.edu',
     url='https://github.com/pnlbwh/nifti-snapshot',
-    download_url='https://github.com/pnlbwh/nifti-snapshot/archive/refs/tags/nifti-snapshot.zip',
+    download_url='https://github.com/pnlbwh/nifti-snapshot/archive/refs/tags/v0.1.10.zip',
     keywords=['nifti', 'snapshot'],
     packages=setuptools.find_packages(),
     classifiers=[
