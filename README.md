@@ -2,50 +2,10 @@
 
 # nifti-snapshot
 
-Tools used to summarize nifti files into figures.
+`nifti-snapshot` is a tool to quickly capture nifti image as a `png` or
+`jpeg` figures.
 
-```py
-git clone https://github.com/pnlbwh/nifti-snapshot
-```
-
-
-## Contents
-
-- TODO
-- Dependencies
-- TBSS figures
-
-
-## TODO
-
-- test script
-- add different background image options
-- 4d map summary (diffusion)
-- ROI & multi ROI visualization
-- project wise examples
-
-
-## Dependencies
-
-```py
-FSLDIR in PATH
-ENIGMA_dir in PATH 
-# download from http://enigma.ini.usc.edu/wp-content/uploads/2013/02/enigmaDTI.zip
-
-python 3.7
-scipy==1.3.3
-nibabel==2.4.0
-numpy==1.16.2
-pathlib2==2.3.3
-matplotlib==3.0.3
-```
-
-## Single image examples
-
-### Link to a single image examples
-
-[Jupyter notebook link](docs/single_image_example.ipynb)
-
+For full documentation: [Here](docs/single_image_example.ipynb)
 
 
 ## TBSS figures
@@ -53,6 +13,7 @@ matplotlib==3.0.3
 ### From commandline
 
 #### Snapshot of an `tbss_fill` image
+
 ```sh
 fw=tbss_FW_tfce_corrp_tstat2_filled.nii.gz
 
