@@ -5,6 +5,11 @@
 `nifti-snapshot` is a tool to quickly capture nifti image as a `png` or
 `jpeg` figures.
 
+
+```sh
+$ pip install nifti_snapshot
+```
+
 For full documentation: [Here](https://nifti-snapshot.readthedocs.io/en/latest/)
 
 
