@@ -1,4 +1,4 @@
-![icon](docs/icon_resize.png) 
+![icon](docs/source/images/icon_resize.png) 
 
 # nifti-snapshot
 
