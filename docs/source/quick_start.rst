@@ -60,6 +60,7 @@ Add below line to your bashrc (``~/.bashrc``) or execute it everytime you use
 .. code-block:: shell
 
     nifti_snapshot -h
+    nifti_snapshot --check_enigma
 
 
 .. note ::

@@ -84,6 +84,11 @@ if __name__ == '__main__':
                            type=str,
                            help='Output png file')
 
+    argparser.add_argument("--check_enigma", "-ce",
+                           type=str,
+                           help='Check if nifti_snapshot has been linked to '
+                                'ENIGMA data')
+
     args = argparser.parse_args()
 
     # TBSS pipeline
@@ -127,3 +132,15 @@ if __name__ == '__main__':
         # vmin_list = [-100],
         # vmax_list = [100],
     )
+
+
+    if args.check_enigma:
+        enigma = nifti_snapshot.Enigma()
+        if enigma.template_fa_loc.is_file():
+            print(f'ENIGMA files exist under {enigma.enigma_dir} - Pass')
+        else:
+            print(f'There is no enigma maps under {enigma.enigma_data_dir}'
+                  '- Fail')
+            print('Please follow instructions on '
+                  'https://nifti-snapshot.readthedocs.io/en/latest/')
+

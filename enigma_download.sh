@@ -7,7 +7,7 @@
 SCRIPT=$(readlink -m $(type -p $0))
 SCRIPTDIR=$(dirname $SCRIPT)
 dataDir=$SCRIPTDIR/data
-enigmaDir=$SCRIPTDIR/data/enigmaDTI
+enigmaDir=${HOME}/enigma_data
 
 echo Download and unzip ENIGMA data
 if [ ! -d ${dataDir} ]
