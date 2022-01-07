@@ -8,14 +8,14 @@ with open("README.md", "r") as fh:
 
 setup(
     name='nifti_snapshot',
-    version='v0.1.10',
+    version='v0.1.11',
     description='First release to test pypi',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='kcho',
     author_email='kevincho@bwh.harvard.edu',
     url='https://github.com/pnlbwh/nifti-snapshot',
-    download_url='https://github.com/pnlbwh/nifti-snapshot/archive/refs/tags/v0.1.10.zip',
+    download_url='https://github.com/pnlbwh/nifti-snapshot/archive/refs/tags/v0.1.11.zip',
     keywords=['nifti', 'snapshot'],
     packages=setuptools.find_packages(),
     classifiers=[
@@ -28,6 +28,6 @@ setup(
                       'scipy>=1.5.2',
                       'seaborn>=0.11.0',
                       'nibabel>=3.2.1'],
+    scripts=['scripts/nifti_snapshot'],
     data_files=[('/nifti_snapshot', ['enigma_download.sh'])],
-    scripts=['scripts/nifti_snapshot']
 )

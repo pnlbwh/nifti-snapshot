@@ -5,56 +5,61 @@ Quick start
 ``jpg`` figures.
 
 
-Installation
-------------
-
 Install the ``nifti-snapshot``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------
 
-EasInstall ``nifti-snapshot`` using ``pip`` ::
+Install ``nifti-snapshot`` using ``pip``
 
-    $ pip install nifti_snapshot
+.. code-block:: shell
+
+    pip install nifti_snapshot
 
 
 .. note ::
 
-   It's ``_``, not ``-`` when using the ``pip``
+   It's ``_``, not ``-``
 
-For the most recent version of ``nifti_snapshot``, you could pull the most
-recent branch from `github repository <https://github.com/pnlbwh/nifti-snapshot>`_.
+For the most recent version of ``nifti_snapshot``, pull the most recent master
+branch from `github repository <https://github.com/pnlbwh/nifti-snapshot>`_.
 
 
-::
+.. code-block:: shell
 
-    $ git clone https://github.com/pnlbwh/nifti-snapshot
+    git clone https://github.com/pnlbwh/nifti-snapshot
 
 
 ENIGMA nifti data
-~~~~~~~~~~~~~~~~~
+-----------------
 
 **Download ENIGMA data**
 
 ``nifti-snapshot`` requires nifti maps that ENIGMA published. It can be
-downlaoded by executing the command below ::
+downlaoded by executing the command below.
 
-    $ enigma_data_dir=${HOME}/enigma_data   # change this if you want to 
-    $ mkdir -p ${enigma_data_dir}
-    $ wget http://enigma.ini.usc.edu/wp-content/uploads/2013/02/enigmaDTI.zip -P ${enigma_data_dir}
-    $ unzip -o -d ${enigma_data_dir} ${enigma_data_dir}/enigmaDTI.zip
+.. code-block:: shell
+
+    enigma_data_dir=${HOME}/enigma_data   # change this if you want to 
+    mkdir -p ${enigma_data_dir}
+    wget http://enigma.ini.usc.edu/wp-content/uploads/2013/02/enigmaDTI.zip -P ${enigma_data_dir}
+    unzip -o -d ${enigma_data_dir} ${enigma_data_dir}/enigmaDTI.zip
 
 
 **Set up PATH environment**
 
 Add below line to your bashrc (``~/.bashrc``) or execute it everytime you use
-``nifti-snapshot``. ::
+``nifti-snapshot``.
 
-    export enigma_data_dir=${HOME}/enigma_data   # change this if you want to 
+.. code-block:: shell
+
+    echo "export enigma_data_dir=${HOME}/enigma_data" >> ~/.bashrc   # change this if you want to 
+    source ~/.bashrc
     
 
 **Check installation**
-::
 
-    $ nifti_snapshot -h
+.. code-block:: shell
+
+    nifti_snapshot -h
 
 
 .. note ::
@@ -64,7 +69,7 @@ Add below line to your bashrc (``~/.bashrc``) or execute it everytime you use
    ``nifti_snapshot/nifti_snapshot`` to your ``PYTHONPATH`` variable to access
    ``nifti_snapshot`` executable from any location.
 
-   ::
+   .. code-block:: shell
 
       export PYTHONPATH=${PATH}:${HOME}/nifti_snapshot/nifti_snapshot
       export PATH=${PATH}:${HOME}/nifti_snapshot/script
@@ -73,9 +78,9 @@ Add below line to your bashrc (``~/.bashrc``) or execute it everytime you use
 Test create an image
 --------------------
 
-::
+.. code-block:: shell
 
-    $ nifti_snapshot \
+    nifti_snapshot \
         --input ${enigma_data_dir}/ENIGMA_DTI_FA.nii.gz \
         --title test_title \
         --output_file t1w_test.png

@@ -20,7 +20,11 @@ class Enigma:
         if 'enigma_data_dir' in os.environ:
             self.enigma_dir = os.environ['enigma_data_dir']
         else:
-            self.enigma_dir = root_dir / 'data' / 'enigmaDTI'
+            print("'enigma_data_dir' not in your shell environment'")
+            print("Put ENIGMA data under ${HOME}/enigma_data")
+            self.enigma_dir = Path(os.environ['HOME']) / 'enigma_data'
+            # self.enigma_dir = root_dir / 'data' / 'enigmaDTI'
+
         self.template_fa_loc = self.enigma_dir / 'ENIGMA_DTI_FA.nii.gz'
         self.template_skeleton_loc = self.enigma_dir / \
             'ENIGMA_DTI_FA_skeleton_mask.nii.gz'

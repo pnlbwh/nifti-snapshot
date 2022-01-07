@@ -34,7 +34,8 @@ release = 'v0.1.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-        'nbsphinx'
+        'nbsphinx',
+        'sphinx_copybutton'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

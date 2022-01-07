@@ -12,17 +12,19 @@ TBSS figures
 
 This would be the most simple, and maybe most useful way of capturing TBSS
 outputs. The assumption in this function is that the TBSS was ran with ENIGMA
-FA template as the standard. ::
+FA template as the standard. 
 
-    $ fw=tbss_FW_tfce_corrp_tstat2_filled.nii.gz
+.. code-block:: shell
 
-    $ nifti_snapshot \
-        --input ${fw} \
-        --tbss \
-        --output_file cli_test_fw.png \
-        --cmap "Blues_r" \
-        --title "Significant changes in FW in group A" \
-        --cbar_title 'Increased FW' 
+    fw=tbss_FW_tfce_corrp_tstat2_filled.nii.gz
+
+    nifti_snapshot \
+      --input ${fw} \
+      --tbss \
+      --output_file cli_test_fw.png \
+      --cmap "Blues_r" \
+      --title "Significant changes in FW in group A" \
+      --cbar_title 'Increased FW' 
 
 The ``cmap`` option used in ``nifti_snapshot`` is based on the `matplotlib
 colormaps <https://matplotlib.org/stable/tutorials/colors/colormaps.html>`_,
@@ -43,7 +45,9 @@ It is uncommon to visualize two different modalities together from TBSS, but it
 could be useful if one wants to investigate shared or unique information
 contained in each modality. For example, visualizing ``FA`` maps and ``FAt``
 maps together may prove helpful to investigate the effect of Freewater modeling
-in finding different regions detected by each modality.::
+in finding different regions detected by each modality.
+
+.. code-block:: shell
 
     fa=tbss_FA_tfce_corrp_tstat1_filled.nii.gz
     fat=tbss_FAt_tfce_corrp_tstat1_filled.nii.gz
@@ -73,9 +77,10 @@ defined through ``--overlap_cmap`` option would be used.
 Calling ``nifti-snapshot`` from python
 ---------------------------------------
 
-::
+.. code-block:: python3
 
     from nifti_snapshot import nifti_snapshot
+
     fw = 'tbss_FA_tfce_corrp_tstat1_filled.nii.gz'
     fw_color = 'Blues_r'
 
@@ -90,9 +95,10 @@ Calling ``nifti-snapshot`` from python
     tbssFigure.create_figure_one_map()
 
 
-::
+.. code-block:: python3
 
     from nifti_snapshot import nifti_snapshot
+
     fa = 'tbss_FA_tfce_corrp_tstat1_filled.nii.gz'
     fat = 'tbss_FAt_tfce_corrp_tstat1_filled.nii.gz'
 
