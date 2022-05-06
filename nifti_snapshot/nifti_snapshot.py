@@ -214,14 +214,22 @@ class FigureNifti:
     def get_slice_nums_non_zero_linspace(self):
         """Get slice_nums based on the zmin and zmax"""
         # get nonzero z coordinates
-        nonzero_coord_z = np.nonzero(self.image_data_list[0])[-1]
-        zmin = nonzero_coord_z.min()
-        zmax = nonzero_coord_z.max()
+        try:
+            nonzero_coord_z = np.nonzero(self.image_data_list[0])[-1]
 
-        # if there is enough nonzero slices to show
-        # z_slices = zmax - zmin
-        # if (zmax - zmin) > self.slice_num:
-        self.slice_nums = np.linspace(zmin, zmax, self.slice_num).astype(int)
+            zmin = nonzero_coord_z.min()
+            zmax = nonzero_coord_z.max()
+
+            # if there is enough nonzero slices to show
+            # z_slices = zmax - zmin
+            # if (zmax - zmin) > self.slice_num:
+            self.slice_nums = np.linspace(zmin, zmax,
+                                          self.slice_num).astype(int)
+        except:
+            self.slice_nums = np.linspace(
+                    0, self.image_data_list[0].shape[-1] - 1,
+                    self.slice_num).astype(int)
+
         # else:
             # zmin_new = zmin - (self.slice_num - z_slices)
             # self.slice_nums = np.linspace(zmin_new, zmax, self.slice_num)
@@ -312,7 +320,7 @@ class Figure(FigureSettings, FigureNifti):
         plt.style.use('dark_background')
 
 
-    def read_data(self, volumes: List[int] = None):
+    def read_data(self, volumes: List[int] = None, get_diff=False):
         # load background data
         if hasattr(self, 'background_files') and \
                 not hasattr(self, 'background_data_list'):
@@ -325,6 +333,10 @@ class Figure(FigureSettings, FigureNifti):
             self.image_data_list = [get_nifti_data(x) for x
                                     in self.image_files]
 
+        if get_diff:
+            diff_map = self.image_data_list[0] - self.image_data_list[1]
+            self.image_data_list = [diff_map]
+
         # if 4d, force to visualize the first volume
         if volumes is not None or \
                 any([len(x.shape) == 4 for x in self.image_data_list]):
@@ -336,6 +348,7 @@ class Figure(FigureSettings, FigureNifti):
                         if len(image_data.shape) == 4 else image_data
                 new_image_data_list.append(image_data)
             self.image_data_list = new_image_data_list
+
 
     def images_mask_out_the_skeleton(self):
         new_images = []
@@ -615,11 +628,13 @@ class TbssFigure(Enigma, Figure, FigureNifti):
         self.fig.suptitle(self.title, y=0.95, fontsize=self.title_font_size)
         self.fig.savefig(self.output_file, dpi=self.dpi)#, bbox_inches='tight')
 
+
 class SimpleFigure(Figure):
     def __init__(self, **kwargs):
         Figure.__init__(self, **kwargs)
 
-        self.read_data(kwargs.get('volumes', None))
+        get_diff = kwargs.get('get_diff', False)
+        self.read_data(kwargs.get('volumes', None), get_diff=get_diff)
 
         self.get_slice_nums_non_zero_linspace()
 
