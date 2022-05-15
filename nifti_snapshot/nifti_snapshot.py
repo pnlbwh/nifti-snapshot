@@ -93,6 +93,42 @@ class FigureSettings:
                     fontsize=15, fontweight='bold', color='white')
             cb.ax.yaxis.set_label_position('left')
 
+    def add_cbars_horizontal_non_p(self):
+        """Add horizontal cbars for tbss stat maps"""
+        self.cbar_x_steps = 0.2
+
+        if len(self.image_data_list) == 1:
+            self.cbar_width = 0.5
+
+        for num, image_data in enumerate(self.image_data_list):
+            # x, y, width, height
+            if hasattr(self, 'cbar_titles'):
+                cbar_title = self.cbar_titles[num]
+            else:
+                cbar_title = f'Image {num+1}'
+
+            axbar = self.fig.add_axes([
+                self.cbar_x,
+                self.cbar_y,
+                self.cbar_width,
+                self.cbar_height])
+
+            cb = self.fig.colorbar(
+                    self.imshow_list[num],
+                    axbar,
+                    orientation='horizontal',
+                    boundaries=[0.999, 1],
+                    ticks=[])
+                # cb.ax.set_major_locator(ticker.LinearLocator(2))
+                # cb.ax.set_xticklabels(['P = 0.05', 'P < 0.01'], color='white')
+
+            cb.outline.set_edgecolor('white')
+            cb.ax.set_title(
+                    cbar_title,
+                    fontsize=15, fontweight='bold', color='white')
+            cb.ax.yaxis.set_label_position('left')
+            self.cbar_x += self.cbar_x_steps
+
     def add_cbars_horizontal(self):
         """Add horizontal cbars for tbss stat maps"""
         self.cbar_x_steps = 0.2
@@ -600,19 +636,25 @@ class TbssFigure(Enigma, Figure, FigureNifti):
 
         # for tbss stats map cbar_ticks
         
-        if kwargs.get('tbss_filled') == True: #TBSS filled
+        if kwargs.get('tbss_filled', False) == True: #TBSS filled
             self.vmin_list = np.tile(0, len(self.image_data_list))
+            self.cbar_ticks = [0, 1]
         else:
             self.vmin_list = np.tile(0.95, len(self.image_data_list))
+            self.cbar_ticks = [0.95, 1]
         self.vmax_list = np.tile(1, len(self.image_data_list))
 
-        self.cbar_ticks = [0.95, 1]
 
         self.images_mask_out_the_zero()
         self.loop_through_axes_draw_bg_tbss()
         self.annotate_with_z()
 
         self.loop_through_axes_draw_images()
+
+    def create_figure_non_p_map(self):
+        self.add_cbars_horizontal_non_p()
+        self.fig.suptitle(self.title, y=0.95, fontsize=self.title_font_size)
+        self.fig.savefig(self.output_file, dpi=self.dpi)#, bbox_inches='tight')
 
     def create_figure_one_map(self):
         self.add_cbars_horizontal()
