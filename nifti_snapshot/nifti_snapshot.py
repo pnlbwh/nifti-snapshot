@@ -149,23 +149,24 @@ class FigureSettings:
                 self.cbar_width,
                 self.cbar_height])
 
-            if cbar_title.lower() != 'overlap':
-                cb = self.fig.colorbar(
-                        self.imshow_list[num],
-                        axbar,
-                        orientation='horizontal',
-                        ticks=[0.95,1])
-                cb.ax.set_xticklabels(
-                        ['P = 0.05', 'P < 0.01'],
-                        color='white',
-                        fontsize=15)
-            else:
-                cb = self.fig.colorbar(
-                        self.imshow_list[num],
-                        axbar,
-                        orientation='horizontal',
-                        boundaries=[0.999, 1],
-                        ticks=[])
+            if type(cbar_title) == str:
+                if cbar_title.lower() != 'overlap':
+                    cb = self.fig.colorbar(
+                            self.imshow_list[num],
+                            axbar,
+                            orientation='horizontal',
+                            ticks=[0.95,1])
+                    cb.ax.set_xticklabels(
+                            ['P = 0.05', 'P < 0.01'],
+                            color='white',
+                            fontsize=15)
+                else:
+                    cb = self.fig.colorbar(
+                            self.imshow_list[num],
+                            axbar,
+                            orientation='horizontal',
+                            boundaries=[0.999, 1],
+                            ticks=[])
                 # cb.ax.set_major_locator(ticker.LinearLocator(2))
                 # cb.ax.set_xticklabels(['P = 0.05', 'P < 0.01'], color='white')
 
