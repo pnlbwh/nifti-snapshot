@@ -18,7 +18,7 @@ class Enigma:
     def __init__(self):
         """ENIGMA template"""
         if 'enigma_data_dir' in os.environ:
-            self.enigma_dir = os.environ['enigma_data_dir']
+            self.enigma_dir = Path(os.environ['enigma_data_dir'])
         else:
             print("'enigma_data_dir' not in your shell environment'")
             print("Put ENIGMA data under ${HOME}/enigma_data")
