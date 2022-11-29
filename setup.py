@@ -8,14 +8,14 @@ with open("README.md", "r") as fh:
 
 setup(
     name='nifti_snapshot',
-    version='v0.1.15',
+    version='0.1.18',
     description='First release to test pypi',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='kcho',
     author_email='kevincho@bwh.harvard.edu',
     url='https://github.com/pnlbwh/nifti-snapshot',
-    download_url='https://github.com/pnlbwh/nifti-snapshot/archive/refs/tags/v0.1.15.zip',
+    download_url='https://github.com/pnlbwh/nifti-snapshot/archive/refs/tags/0.1.18.zip',
     keywords=['nifti', 'snapshot'],
     packages=setuptools.find_packages(),
     classifiers=[

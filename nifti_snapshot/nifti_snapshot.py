@@ -160,13 +160,13 @@ class FigureSettings:
                             ['P = 0.05', 'P < 0.01'],
                             color='white',
                             fontsize=15)
-                else:
-                    cb = self.fig.colorbar(
-                            self.imshow_list[num],
-                            axbar,
-                            orientation='horizontal',
-                            boundaries=[0.999, 1],
-                            ticks=[])
+            else:
+                cb = self.fig.colorbar(
+                        self.imshow_list[num],
+                        axbar,
+                        orientation='horizontal',
+                        boundaries=[0.999, 1],
+                        ticks=[])
                 # cb.ax.set_major_locator(ticker.LinearLocator(2))
                 # cb.ax.set_xticklabels(['P = 0.05', 'P < 0.01'], color='white')
 
@@ -656,11 +656,13 @@ class TbssFigure(Enigma, Figure, FigureNifti):
         self.add_cbars_horizontal_non_p()
         self.fig.suptitle(self.title, y=0.95, fontsize=self.title_font_size)
         self.fig.savefig(self.output_file, dpi=self.dpi)#, bbox_inches='tight')
+        plt.close(self.fig)
 
     def create_figure_one_map(self):
         self.add_cbars_horizontal()
         self.fig.suptitle(self.title, y=0.95, fontsize=self.title_font_size)
         self.fig.savefig(self.output_file, dpi=self.dpi)#, bbox_inches='tight')
+        plt.close(self.fig)
 
     def create_figure_two_maps_and_overlap(self):
         # estimate overlap
@@ -670,6 +672,7 @@ class TbssFigure(Enigma, Figure, FigureNifti):
 
         self.fig.suptitle(self.title, y=0.95, fontsize=self.title_font_size)
         self.fig.savefig(self.output_file, dpi=self.dpi)#, bbox_inches='tight')
+        plt.close(self.fig)
 
 
 class SimpleFigure(Figure):
@@ -712,6 +715,9 @@ class SimpleFigure(Figure):
 
         self.fig.suptitle(self.title, y=0.90, fontsize=self.title_font_size)
         self.fig.savefig(self.output_file, dpi=self.dpi)  #, bbox_inches='tight')
+        plt.close(self.fig)
+
+
 
 
 class SimpleHistogram(Figure):
@@ -735,3 +741,5 @@ class SimpleHistogram(Figure):
 
         plt.style.use('default')
         self.fig.suptitle(self.title, y=0.90, fontsize=self.title_font_size)
+        self.fig.savefig(self.output_file, dpi=self.dpi)  #, bbox_inches='tight')
+        plt.close(self.fig)
