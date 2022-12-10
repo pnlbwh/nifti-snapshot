@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='nifti_snapshot',
-    version='0.1.18',
+    version='0.1.19',
     description='First release to test pypi',
     long_description=long_description,
     long_description_content_type="text/markdown",

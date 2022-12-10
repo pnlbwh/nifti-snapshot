@@ -342,7 +342,7 @@ class Figure(FigureSettings, FigureNifti):
             nrows=self.nrows,
             figsize=(self.size_w * self.ncols,
                      self.size_h * self.nrows),
-            dpi=self.dpi)
+            dpi=self.dpi, clear=True)
 
         self.get_cbar_horizontal_info()
 
