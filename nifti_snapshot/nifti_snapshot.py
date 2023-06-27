@@ -326,6 +326,7 @@ class FigureNifti:
 
 class Figure(FigureSettings, FigureNifti):
     def __init__(self, **kwargs):
+        plt.style.use('dark_background')
         FigureSettings.__init__(self)
 
         for key, value in kwargs.items():
@@ -352,9 +353,6 @@ class Figure(FigureSettings, FigureNifti):
                 wspace=self.wspace,
                 top=self.top,
                 bottom=self.bottom)
-
-        # dark background
-        plt.style.use('dark_background')
 
 
     def read_data(self, volumes: List[int] = None, get_diff=False):
@@ -495,7 +493,7 @@ class Figure(FigureSettings, FigureNifti):
                     has_vmax = False
 
                 image_d = self.get_slice(image, z_num)
-                img = sns.distplot(np.ravel(image_d), ax=ax)
+                img = sns.kdeplot(np.ravel(image_d), ax=ax)
 
                 if has_vmin:
                     ax.set_xlim(vmin, vmax)
@@ -714,14 +712,14 @@ class SimpleFigure(Figure):
         self.add_intensity_cbars_horizontal()
 
         self.fig.suptitle(self.title, y=0.90, fontsize=self.title_font_size)
-        self.fig.savefig(self.output_file, dpi=self.dpi)  #, bbox_inches='tight')
-        plt.close(self.fig)
-
-
+        if hasattr(self, 'output_file'):
+            self.fig.savefig(self.output_file, dpi=self.dpi)  #, bbox_inches='tight')
+        # plt.close(self.fig)
 
 
 class SimpleHistogram(Figure):
     def __init__(self, **kwargs):
+        plt.style.use('default')
         Figure.__init__(self, **kwargs)
         self.read_data()
 
@@ -739,7 +737,7 @@ class SimpleHistogram(Figure):
         self.loop_through_axes_draw_hist()
         self.annotate_with_z()
 
-        plt.style.use('default')
         self.fig.suptitle(self.title, y=0.90, fontsize=self.title_font_size)
-        self.fig.savefig(self.output_file, dpi=self.dpi)  #, bbox_inches='tight')
-        plt.close(self.fig)
+        if hasattr(self, 'output_file'):
+            self.fig.savefig(self.output_file, dpi=self.dpi)  #, bbox_inches='tight')
+        # plt.close(self.fig)
