@@ -686,7 +686,7 @@ class SimpleFigureGif(Figure):
 
         filename_list = []
         for vol in range(0, data_list[0].shape[-1], 2):
-            output_file = f'{file_name_prefix}_{vol:03d}.jpg'
+            output_file = f'{file_name_prefix}_{vol:03d}.png'
             if Path(output_file).is_file():
                 continue
             _ = SimpleFigure(
