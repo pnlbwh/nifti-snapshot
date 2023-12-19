@@ -12,6 +12,7 @@ from nifti_snapshot.nifti_snapshot_utils import script_dir, lib_dir, root_dir
 
 import matplotlib.ticker as ticker
 from typing import List
+import imageio
 
 
 class Enigma:
@@ -330,8 +331,10 @@ class Figure(FigureSettings, FigureNifti):
         FigureSettings.__init__(self)
 
         for key, value in kwargs.items():
-            print(f"\t{key} : {value}")
             setattr(self, key, value)
+            if key == 'image_data_list':
+                continue
+            print(f"\t{key} : {value}")
 
         # The number of slices to be shown in the output figures depend on the
         # number of rows and columns
@@ -452,54 +455,7 @@ class Figure(FigureSettings, FigureNifti):
                         vmin=vmin,
                         vmax=1, alpha=alpha)
                 self.imshow_list.append(img)
-
-    def loop_through_axes_draw_hist(self):
-        """Loop thorugh each axis drawing figures"""
-
-        # bbox
-        if hasattr(self, 'box_x'):
-            self.image_data_list = [
-                x[self.box_x[0]:self.box_x[1], :, :] \
-                    for x in self.image_data_list]
-
-        if hasattr(self, 'box_y'):
-            self.image_data_list = [
-                x[:, self.box_y[0]:self.box_y[1], :] \
-                    for x in self.image_data_list]
-
-        if hasattr(self, 'box_z'):
-            self.image_data_list = [
-                x[:, :, self.box_z[0]:self.box_z[1]] \
-                    for x in self.image_data_list]
-
-        for num, ax in enumerate(np.ravel(self.axes)):
-            z_num = self.slice_nums[num]
-
-            # background FA map
-            self.imshow_list = []
-
-            for img_num, image in enumerate(self.image_data_list):
-                # vmin and vmax, which must be consistent across the figures
-                if hasattr(self, 'vmin_list'):
-                    vmin = self.vmin_list[img_num]
-                    has_vmin = True
-                else:
-                    has_vmin = False
-
-                if hasattr(self, 'vmax_list'):
-                    vmax = self.vmax_list[img_num]
-                    has_vmax = True
-                else:
-                    has_vmax = False
-
-                image_d = self.get_slice(image, z_num)
-                img = sns.kdeplot(np.ravel(image_d), ax=ax)
-
-                if has_vmin:
-                    ax.set_xlim(vmin, vmax)
-                    ax.set_ylim(0, 0.0001)
-                self.imshow_list.append(img)
-
+            
     def loop_through_axes_draw_images(self):
         """TODO: make this clean Loop thorugh each axis drawing figures"""
 
@@ -602,6 +558,7 @@ class Figure(FigureSettings, FigureNifti):
                     vmax=1, alpha=alpha)
             self.imshow_list.append(img)
     # def create_figure_
+
 
 class TbssFigure(Enigma, Figure, FigureNifti):
     """TBSS related figure"""
@@ -715,6 +672,46 @@ class SimpleFigure(Figure):
         if hasattr(self, 'output_file'):
             self.fig.savefig(self.output_file, dpi=self.dpi)  #, bbox_inches='tight')
         # plt.close(self.fig)
+
+
+class SimpleFigureGif(Figure):
+    def __init__(self, **kwargs):
+        super(SimpleFigureGif, self).__init__()
+
+        image_files = [Path(x) for x in kwargs.get('image_files', [])]
+        image_data_list = [x for x in image_files]
+        data_list = [get_nifti_data(x) for x in image_data_list]
+        file_name_prefix = kwargs.get('file_name_prefix',
+                                      'test_fig_for_gif')
+
+        filename_list = []
+        for vol in range(0, data_list[0].shape[-1], 2):
+            output_file = f'{file_name_prefix}_{vol:03d}.jpg'
+            if Path(output_file).is_file():
+                continue
+            _ = SimpleFigure(
+                image_data_list=data_list,
+                title=f'{file_name_prefix}: vol ({vol})',
+                make_transparent_zero=True,
+                cbar_width=0.5,
+                cbar_title='Intensity',
+                output_file=output_file,
+                volumes=[vol],
+                dpi=100
+            )
+            filename_list.append(output_file)
+            plt.close()
+
+        with imageio.get_writer(f'{file_name_prefix}.gif',
+                                mode='I',
+                                duration=0.1) as writer:
+            for filename in filename_list:
+                image = imageio.imread(filename)
+                writer.append_data(image)
+
+        # Clean-up frames
+        for filename in filename_list:
+            os.remove(filename)
 
 
 class SimpleHistogram(Figure):
