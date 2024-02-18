@@ -359,6 +359,16 @@ class Figure(FigureSettings, FigureNifti):
 
 
     def read_data(self, volumes: List[int] = None, get_diff=False):
+        """
+        Reads and loads the background and foreground data for visualization.
+
+        Args:
+            volumes (List[int], optional): List of volume indices to visualize. If None, all volumes are visualized. Defaults to None.
+            get_diff (bool, optional): Flag indicating whether to compute the difference map of the foreground data. Defaults to False.
+
+        Returns:
+            None
+        """
         # load background data
         if hasattr(self, 'background_files') and \
                 not hasattr(self, 'background_data_list'):
