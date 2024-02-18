@@ -672,7 +672,40 @@ class SimpleFigure(Figure):
         if hasattr(self, 'output_file'):
             self.fig.savefig(self.output_file, dpi=self.dpi)  #, bbox_inches='tight')
         # plt.close(self.fig)
+        # plt.close(self.fig)
 
+class SimpleROI(FigureWoSubplotsAdjust):
+    def __init__(self, **kwargs):
+        Figure.__init__(self, **kwargs)
+
+        get_diff = kwargs.get('get_diff', False)
+        self.read_data(kwargs.get('volumes', None), get_diff=get_diff)
+        self.get_slice_nums_non_zero_linspace()
+
+        if hasattr(self, 'slice_num_lowest'):
+            self.slice_nums = [int(x) for x in \
+                np.linspace(self.slice_num_lowest,
+                            self.slice_num_highest,
+                            self.ncols * self.nrows)]
+        else:
+            pass
+
+        # if hasattr(self, 'background_files') or \
+        #     hasattr(self, 'background_data_list'):
+        #     self.loop_through_axes_draw_backgrounds()
+        self.loop_through_axes_draw_images()
+        self.annotate_with_z()
+
+        if not hasattr(self, 'cbar_titles'):
+            self.cbar_titles = ['intensity', 'intensity']
+        # self.add_intensity_cbars_horizontal()
+        print('done')
+
+        # self.fig.suptitle(self.title, y=0.90, fontsize=self.title_font_size)
+        # if hasattr(self, 'output_file'):
+        #     self.fig.savefig(self.output_file, dpi=self.dpi)  #, bbox_inches='tight')
+        # plt.close(self.fig)
+        # plt.close(self.fig)
 
 class SimpleFigureGif(Figure):
     def __init__(self, **kwargs):
