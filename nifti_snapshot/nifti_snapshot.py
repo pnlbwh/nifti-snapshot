@@ -525,7 +525,6 @@ class Figure(FigureSettings, FigureNifti):
                 else:
                     cmap = 'autumn'
 
-
                 if has_vmin and has_vmax:
                     img = ax.imshow(
                         image_d,
@@ -569,6 +568,30 @@ class Figure(FigureSettings, FigureNifti):
             self.imshow_list.append(img)
     # def create_figure_
 
+class FigureWoSubplotsAdjust(Figure):
+    def __init__(self, **kwargs):
+        plt.style.use('dark_background')
+        FigureSettings.__init__(self)
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+            if key == 'image_data_list':
+                continue
+            print(f"\t{key} : {value}")
+
+        # The number of slices to be shown in the output figures depend on the
+        # number of rows and columns
+        self.slice_num = self.nrows * self.ncols
+
+        # create fig and axes
+        self.fig, self.axes = plt.subplots(
+            ncols=self.ncols,
+            nrows=self.nrows,
+            figsize=(self.size_w * self.ncols,
+                     self.size_h * self.nrows),
+            dpi=self.dpi, clear=True)
+
+        self.get_cbar_horizontal_info()
 
 class TbssFigure(Enigma, Figure, FigureNifti):
     """TBSS related figure"""
@@ -684,7 +707,8 @@ class SimpleFigure(Figure):
         # plt.close(self.fig)
         # plt.close(self.fig)
 
-class SimpleROI(FigureWoSubplotsAdjust):
+# class SimpleROI(FigureWoSubplotsAdjust):
+class SimpleROI(Figure):
     def __init__(self, **kwargs):
         Figure.__init__(self, **kwargs)
 
