@@ -1,18 +1,17 @@
 #!/usr/bin/env python
-
-import matplotlib.pyplot as plt
+import os
+import imageio
 import numpy as np
+import seaborn as sns
+from typing import List
 from pathlib import Path
 from scipy import ndimage
-import os
-import seaborn as sns
-
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from nifti_snapshot.nifti_snapshot_utils import get_nifti_data, get_nifti_img_data
 from nifti_snapshot.nifti_snapshot_utils import script_dir, lib_dir, root_dir
-
-import matplotlib.ticker as ticker
-from typing import List
-import imageio
+from nifti_snapshot.nifti_snapshot_utils import get_cmap_wmparc, get_filename_path_dict_from_fs_outdir, \
+        rotate_fs_created_nii, convert_mgz_to_nii
 
 
 class Enigma:
@@ -30,6 +29,7 @@ class Enigma:
         self.template_skeleton_loc = self.enigma_dir / \
             'ENIGMA_DTI_FA_skeleton_mask.nii.gz'
 
+
 class Fsl:
     def __init__(self):
         """FSL template"""
@@ -38,6 +38,7 @@ class Fsl:
             'data/standard/FMRIB58_FA_1mm.nii.gz'
         self.template_skeleton_loc = Path(self.fsldir) / \
             'data/standard/FMRIB58_FA-skeleton_1mm.nii.gz'
+
 
 class FigureSettings:
     def __init__(self):
@@ -568,6 +569,7 @@ class Figure(FigureSettings, FigureNifti):
             self.imshow_list.append(img)
     # def create_figure_
 
+
 class FigureWoSubplotsAdjust(Figure):
     def __init__(self, **kwargs):
         plt.style.use('dark_background')
@@ -592,6 +594,7 @@ class FigureWoSubplotsAdjust(Figure):
             dpi=self.dpi, clear=True)
 
         self.get_cbar_horizontal_info()
+
 
 class TbssFigure(Enigma, Figure, FigureNifti):
     """TBSS related figure"""
@@ -707,11 +710,10 @@ class SimpleFigure(Figure):
         # plt.close(self.fig)
         # plt.close(self.fig)
 
-# class SimpleROI(FigureWoSubplotsAdjust):
-class SimpleROI(Figure):
-    def __init__(self, **kwargs):
-        Figure.__init__(self, **kwargs)
 
+class SimpleROI(FigureWoSubplotsAdjust):
+    def __init__(self, **kwargs):
+        FigureWoSubplotsAdjust.__init__(self, **kwargs)
         get_diff = kwargs.get('get_diff', False)
         self.read_data(kwargs.get('volumes', None), get_diff=get_diff)
         self.get_slice_nums_non_zero_linspace()
@@ -724,22 +726,42 @@ class SimpleROI(Figure):
         else:
             pass
 
-        # if hasattr(self, 'background_files') or \
-        #     hasattr(self, 'background_data_list'):
-        #     self.loop_through_axes_draw_backgrounds()
         self.loop_through_axes_draw_images()
         self.annotate_with_z()
 
         if not hasattr(self, 'cbar_titles'):
             self.cbar_titles = ['intensity', 'intensity']
-        # self.add_intensity_cbars_horizontal()
         print('done')
 
-        # self.fig.suptitle(self.title, y=0.90, fontsize=self.title_font_size)
-        # if hasattr(self, 'output_file'):
-        #     self.fig.savefig(self.output_file, dpi=self.dpi)  #, bbox_inches='tight')
-        # plt.close(self.fig)
-        # plt.close(self.fig)
+
+class FreesurferWmparc(SimpleROI):
+    def __init__(self, **kwargs):
+        self.fs_outdir = kwargs.get('fs_outdir', None)
+        FREESURFER_HOME = kwargs.get('FREESURFER_HOME', None)
+        if self.fs_outdir is not None:
+           filename_path_dict = get_filename_path_dict_from_fs_outdir(
+               self.fs_outdir
+           ) 
+           print(filename_path_dict)
+
+        wmparc_mgz_loc = filename_path_dict['wmparc']
+        wmparc_nii_loc = wmparc_mgz_loc.parent / \
+            (wmparc_mgz_loc.name.split('.')[0] + '.nii.gz')
+        if not wmparc_nii_loc.is_file():
+            convert_mgz_to_nii(wmparc_mgz_loc, wmparc_nii_loc, FREESURFER_HOME)
+        wmparc_data = get_nifti_data(wmparc_nii_loc)
+        t1w_mgz_loc = filename_path_dict['T1']
+        t1w_nii_loc = t1w_mgz_loc.parent / \
+            (t1w_mgz_loc.name.split('.')[0] + '.nii.gz')
+        if not t1w_nii_loc.is_file():
+            convert_mgz_to_nii(t1w_mgz_loc, t1w_nii_loc, FREESURFER_HOME)
+        t1w_data = get_nifti_data(t1w_nii_loc)
+        cmap = get_cmap_wmparc(FREESURFER_HOME)
+        kwargs['image_data_list'] = [rotate_fs_created_nii(t1w_data),
+                                     rotate_fs_created_nii(wmparc_data)]
+        kwargs['cmap_list'] = ['gray', cmap]
+        super(FreesurferWmparc, self).__init__(**kwargs)
+
 
 class SimpleFigureGif(Figure):
     def __init__(self, **kwargs):
